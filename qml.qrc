@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>RightDock.qml</file>
+        <file>close.png</file>
+        <file>next_button.png</file>
+        <file>previous_button.png</file>
+        <file>ship.png</file>
+        <file>ship-2.png</file>
+        <file>trackList.png</file>
+    </qresource>
+</RCC>
