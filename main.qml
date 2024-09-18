@@ -214,6 +214,42 @@ ApplicationWindow {
     } //map ends
 
 
+    Rectangle {
+
+            width: parent.width
+            height: 400
+            anchors.left: parent.left
+            color: "lightgray"
+
+            Column {
+                anchors.fill: parent
+                spacing: 10
+                padding: 10
+
+                Button {
+                    text: "Fetch Ship Data"
+                    onClicked: shipDataModel.fetchShipData()
+                }
+
+                Text {
+                    visible: shipDataModel.isLoading
+                    text: "Loading..."
+                }
+
+                ScrollView {
+                    width: parent.width
+                    height: parent.height - 50
+                    clip: true
+
+                    TextArea {
+                        width: parent.width
+                        wrapMode: TextArea.Wrap
+                        readOnly: true
+                        text: shipDataModel.shipData
+                    }
+                }
+            }
+        }
 
     // Rectangle {
     //     id: mmsiUuidPanel
@@ -268,8 +304,11 @@ ApplicationWindow {
         Component.onCompleted: {
             console.log("QML component completed")
             shipData.fetchShips()
+            shipDataModel.fetchShipData()
         }
 
 
 
+
    }
+

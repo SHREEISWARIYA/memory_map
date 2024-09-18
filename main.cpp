@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "shipdata.h"
+#include "shipdatamodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,8 +14,10 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     ShipData shipData;
+    ShipDataModel shipDataModel;
 
     engine.rootContext()->setContextProperty("shipData", &shipData);
+    engine.rootContext()->setContextProperty("shipDataModel", &shipDataModel);
 
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
