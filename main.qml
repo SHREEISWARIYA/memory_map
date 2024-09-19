@@ -213,102 +213,146 @@ ApplicationWindow {
         }
     } //map ends
 
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 10
 
-    Rectangle {
+        Button {
+            text: "Fetch Ship Data"
+            onClicked: {
+                shipDataModel.fetchShipData()
+                bottomDrawer.open()
+            }
+            Layout.alignment: Qt.AlignHCenter
+        }
 
-            width: parent.width
-            height: 400
-            anchors.left: parent.left
-            color: "lightgray"
+        Text {
+            visible: shipDataModel.isLoading
+            text: "Loading..."
+            Layout.alignment: Qt.AlignHCenter
+        }
+    }
 
-            Column {
-                anchors.fill: parent
-                spacing: 10
-                padding: 10
+    Drawer {
+        id: bottomDrawer
+        width: parent.width
+        height: parent.height * 0.4
+        edge: Qt.BottomEdge
 
-                Button {
-                    text: "Fetch Ship Data"
-                    onClicked: shipDataModel.fetchShipData()
-                }
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 10
 
-                Text {
-                    visible: shipDataModel.isLoading
-                    text: "Loading..."
-                }
+            TableView {
+                id: tableView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
 
-                ScrollView {
-                    width: parent.width
-                    height: parent.height - 50
-                    clip: true
+                model: shipDataModel.tableModel
 
-                    TextArea {
-                        width: parent.width
-                        wrapMode: TextArea.Wrap
-                        readOnly: true
-                        text: shipDataModel.shipData
+                columnWidthProvider: function(column) { return 150; }
+
+                // Header row
+                Row {
+                    id: headerRow
+                    y: tableView.contentY
+                    z: 2
+                    Repeater {
+                        model: tableView.columns
+                        Rectangle {
+                            width: tableView.columnWidthProvider(modelData)
+                            height: 35
+                            color: "lightgray"
+                            border.width: 1
+                            border.color: "gray"
+
+                            Text {
+
+                                anchors.centerIn: parent
+                                text: shipDataModel.tableModel.headerData(modelData, Qt.Horizontal)
+                                font.bold: true
+                            }
+                        }
                     }
                 }
+
+                // Data rows
+                delegate: Rectangle {
+                    implicitWidth: 150
+                    implicitHeight: 35
+                    border.width: 1
+                    border.color: "lightgray"
+
+                    Text {
+                        wrapMode: Text.Wrap
+                        anchors.centerIn: parent
+                        text: display
+                        elide: Text.ElideRight
+                    }
+                }
+
+                // Adjust the top margin to account for the header row
+                topMargin: headerRow.height
             }
+
+            // Pagination controls
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+
+
+
+
+                // Entries info text
+                Text {
+                    id: entriesInfoText
+                    Layout.alignment: Qt.AlignHCenter
+
+                    text: {
+                        if (shipDataModel.totalShips > 0) {
+                            var start = (shipDataModel.currentPage - 1) * shipDataModel.itemsPerPage + 1;
+                            var end = Math.min(start + shipDataModel.itemsPerPage - 1, shipDataModel.totalShips);
+                            return "Showing " + start + " to " + end + " of " + shipDataModel.totalShips + " entries";
+                        } else {
+                            return "Showing 0 to 0 of 0 entries";
+                        }
+                    }
+                }
+                Item {
+                        Layout.fillWidth: true // This will take up all available space
+                    }
+                PaginationControl {
+                    currentPage: shipDataModel.currentPage
+                    totalPages: Math.max(1, Math.ceil(shipDataModel.totalShips / shipDataModel.itemsPerPage))
+                    onPageChanged: shipDataModel.currentPage = page
+                }
+                Item {
+                        Layout.fillWidth: true // This will take up all available space
+                    }
+                RowLayout{
+                    Label { text: "Items per page:" }
+
+                    ComboBox {
+                        id: itemsPerPageComboBox
+                        model: [5, 10, 15, 20, 25, 30] // Options for items per page
+                        currentIndex: model.indexOf(shipDataModel.itemsPerPage)
+                        onCurrentIndexChanged: {
+                            shipDataModel.itemsPerPage = model[currentIndex];
+                        }
+                    }
+                }
+
+
+            }
+
+
         }
+    }
 
-    // Rectangle {
-    //     id: mmsiUuidPanel
-    //     width: 250
-    //     height: parent.height
-    //     anchors.left: parent.left
-    //     color: "white"
-    //     opacity: 0.8
-
-    //     Column {
-    //         anchors.fill: parent
-    //         anchors.margins: 10
-    //         spacing: 10
-
-    //         Text {
-    //             anchors.horizontalCenter: parent.horizontalCenter
-    //             text: "MMSI-UUID List"
-    //             font.pixelSize: 18
-    //             font.bold: true
-    //         }
-
-    //         ListView {
-    //             width: parent.width
-    //             height: parent.height - 40  // Subtract some space for the header
-    //             model: shipData.mmsiUuidList
-    //             clip: true
-
-    //             delegate: ItemDelegate {
-    //                 width: parent.width
-    //                 height: 60
-
-    //                 Column {
-    //                     anchors.fill: parent
-    //                     anchors.margins: 5
-
-    //                     Text {
-    //                         text: "MMSI: " + modelData.mmsi
-    //                         font.bold: true
-    //                     }
-    //                     Text {
-    //                         text: "UUID: " + modelData.uuid
-    //                     }
-    //                 }
-    //             }
-
-    //             ScrollBar.vertical: ScrollBar {}
-    //         }
-    //     }
-    // }
-
-
-        Component.onCompleted: {
-            console.log("QML component completed")
-            shipData.fetchShips()
-            shipDataModel.fetchShipData()
-        }
-
-
-
-
-   }
+    Component.onCompleted: {
+        console.log("QML component completed")
+        shipData.fetchShips()
+        shipDataModel.fetchShipData()
+    }
+}
 

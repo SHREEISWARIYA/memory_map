@@ -7,7 +7,8 @@ QT += quick
 SOURCES += \
         main.cpp \
         shipdata.cpp \
-        shipdatamodel.cpp
+        shipdatamodel.cpp \
+        shiptablemodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -24,4 +25,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     shipdata.h \
-    shipdatamodel.h
+    shipdatamodel.h \
+    shiptablemodel.h

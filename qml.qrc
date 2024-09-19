@@ -9,5 +9,6 @@
         <file>ship-2.png</file>
         <file>trackList.png</file>
         <file>Pagination.qml</file>
+        <file>PaginationControl.qml</file>
     </qresource>
 </RCC>
