@@ -20,7 +20,7 @@ int ShipTableModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return m_headers.size() + 1; // Add 1 for the button column
+    return m_headers.size();
 }
 
 QVariant ShipTableModel::data(const QModelIndex &index, int role) const
@@ -55,8 +55,8 @@ QVariant ShipTableModel::headerData(int section, Qt::Orientation orientation, in
     if (orientation == Qt::Horizontal) {
         if (section < m_headers.size())
             return m_headers[section];
-        else if (section == m_headers.size())
-            return "Actions"; // Header for the button column
+        // else if (section == m_headers.size())
+        //     return "Actions"; // Header for the button column
     }
 
     return QVariant();
@@ -81,6 +81,9 @@ void ShipTableModel::setShipData(const QMap<QString, QJsonObject> &shipData, con
     m_shipOrder = shipOrder;
     if (!m_shipData.isEmpty()) {
         m_headers = m_shipData.first().keys();
+        // Ensure MMSI is the first column
+        m_headers.removeAll("mmsi");
+        m_headers.prepend("mmsi");
     }
     endResetModel();
 }

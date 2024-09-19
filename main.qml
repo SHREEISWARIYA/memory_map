@@ -265,7 +265,6 @@ ApplicationWindow {
                 width: 40
                 height: 40
 
-
                 // Ripple effect
                 Rectangle {
                     id: ripple
@@ -280,7 +279,7 @@ ApplicationWindow {
                     // Ripple animation
                     SequentialAnimation on scale {
                         loops: Animation.Infinite
-                        PropertyAnimation { to: 2.0; duration: 1000 }
+                        PropertyAnimation { to: 1.5; duration: 1000 }
                         PropertyAnimation { to: 1.0; duration: 0 }
                     }
                     SequentialAnimation on opacity {
@@ -303,7 +302,6 @@ ApplicationWindow {
                 shipDataModel.fetchShipData()
                 bottomDrawer.open()
             }
-            //Layout.alignment: Qt.AlignHCenter
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.margins: 10
@@ -353,7 +351,7 @@ ApplicationWindow {
                             Text {
 
                                 anchors.centerIn: parent
-                                text: shipDataModel.tableModel.headerData(modelData, Qt.Horizontal)
+                                text:  shipDataModel.tableModel.headerData(modelData, Qt.Horizontal)
                                 font.bold: true
                             }
                         }
@@ -370,22 +368,27 @@ ApplicationWindow {
                     Text {
                         anchors.fill: parent
                         anchors.margins: 5
-                        text: display
+                        text: (display!="Action") ? display : ""
                         verticalAlignment: Text.AlignVCenter
                         elide: Text.ElideRight
-                        visible: column < tableView.columns - 1 // Hide for the last column
+                        color: column === 0 ? "blue" : "black" // Make MMSI blue to look like a hyperlink
+                        font.underline: column === 0 // Underline the MMSI
                     }
 
-                    Button {
+                    MouseArea {
                         anchors.fill: parent
-                        anchors.margins: 2
-                        text: "Action"
-                        visible: column === tableView.columns - 1 // Only show in the last column
+                        cursorShape: column === 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
                         onClicked: {
-                            var shipData = shipDataModel.tableModel.getShipDataForRow(row);
-                            console.log("Action clicked for row:", row);
-                            console.log("Latitude:", shipData.latitude, "Longitude:", shipData.longitude);
-                            handleShipClick(shipData.latitude, shipData.longitude);
+                            if (column === 0) { // Check if it's the MMSI column
+                                var shipData = shipDataModel.tableModel.getShipDataForRow(row);
+                                console.log("Clicked MMSI:", shipData.mmsi);
+                                bottomDrawer.close()
+
+                                console.log("Latitude:", shipData.latitude, "Longitude:", shipData.longitude);
+                                handleShipClick(shipData.latitude, shipData.longitude);
+
+
+                            }
                         }
                     }
                 }
@@ -461,18 +464,34 @@ ApplicationWindow {
     function handleShipClick(latitude, longitude) {
         console.log("Received latitude:", latitude, "longitude:", longitude);
 
-        // Center the map on the clicked coordinates
-        mapview.center = QtPositioning.coordinate(latitude, longitude);
-        mapview.zoomLevel = 15;
+        if (latitude && longitude) {
+            var coordinate = QtPositioning.coordinate(latitude, longitude);
+            console.log("Created coordinate:", coordinate);
 
-        // Update the marker position
-        markerItem.coordinate = QtPositioning.coordinate(latitude, longitude);
+            if (markerItem) {
+                markerItem.coordinate = coordinate;
+                markerItem.visible = true;
+                console.log("Marker set to:", markerItem.coordinate);
+            } else {
+                console.error("markerItem is not defined");
+            }
 
-        // Show the marker
-        markerItem.visible = true;
+            if (mapview) {
+                mapview.center = coordinate;
+                mapview.zoomLevel = 15;
+                console.log("Map centered at:", mapview.center);
+            } else {
+                console.error("mapview is not defined");
+            }
 
-        // Start the timer to hide the marker after 5 seconds
-        hideMarkerTimer.restart();
+            if (hideMarkerTimer) {
+                hideMarkerTimer.restart();
+            } else {
+                console.error("hideMarkerTimer is not defined");
+            }
+        } else {
+            console.error("Invalid latitude or longitude");
+        }
     }
 
     Component.onCompleted: {
