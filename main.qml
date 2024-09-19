@@ -130,6 +130,45 @@ ApplicationWindow {
                     width: 18
                     height: 16
 
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            console.log("Clicked MMSI:", shipDetails.mmsi);
+                            console.log("Latitude:", shipDetails.latitude);
+                            console.log("Longitude:", shipDetails.longitude);
+
+                            if (shipDetails.latitude && shipDetails.longitude) {
+                                var coordinate = QtPositioning.coordinate(shipDetails.latitude, shipDetails.longitude);
+                                console.log("Created coordinate:", coordinate);
+
+                                if (markerItem) {
+                                    markerItem.coordinate = coordinate;
+                                    markerItem.visible = true;
+                                    console.log("Marker set to:", markerItem.coordinate);
+                                } else {
+                                    console.error("markerItem is not defined");
+                                }
+
+                                if (mapview) {
+                                    mapview.center = coordinate;
+                                    mapview.zoomLevel = 12;
+                                    console.log("Map centered at:", mapview.center);
+                                } else {
+                                    console.error("mapview is not defined");
+                                }
+
+                                if (hideMarkerTimer) {
+                                    hideMarkerTimer.restart();
+                                } else {
+                                    console.error("hideMarkerTimer is not defined");
+                                }
+                            } else {
+                                console.error("Invalid latitude or longitude");
+                            }
+                        }
+                    }
+
                     ToolTip {
                         id: hoverToolTip
                         visible: false // Initially hidden
@@ -211,6 +250,47 @@ ApplicationWindow {
                 }
             }
         }
+
+        // Add this MapQuickItem for the marker
+        MapQuickItem {
+            id: markerItem
+            anchorPoint.x: marker.width/2
+            anchorPoint.y: marker.height/2
+            coordinate: mapview.center
+            visible: false
+
+            sourceItem: Image {
+                id: marker
+                source: "qrc:/marker.png" // Make sure you have this image in your resources
+                width: 40
+                height: 40
+
+
+                // Ripple effect
+                Rectangle {
+                    id: ripple
+                    anchors.centerIn: parent
+                    width: marker.width * 0.6  // Reduced to 80% of the marker size
+                    height: marker.height * 0.6  // Reduced to 80% of the marker size
+                    color: 'transparent'
+                    border.color: 'red'
+                    border.width: 2
+                    radius: width / 2
+
+                    // Ripple animation
+                    SequentialAnimation on scale {
+                        loops: Animation.Infinite
+                        PropertyAnimation { to: 2.0; duration: 1000 }
+                        PropertyAnimation { to: 1.0; duration: 0 }
+                    }
+                    SequentialAnimation on opacity {
+                        loops: Animation.Infinite
+                        PropertyAnimation { to: 0; duration: 1000 }
+                        PropertyAnimation { to: 0.5; duration: 0 }
+                    }
+                }
+            }
+        }
     } //map ends
 
     ColumnLayout {
@@ -223,7 +303,10 @@ ApplicationWindow {
                 shipDataModel.fetchShipData()
                 bottomDrawer.open()
             }
-            Layout.alignment: Qt.AlignHCenter
+            //Layout.alignment: Qt.AlignHCenter
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.margins: 10
         }
 
         Text {
@@ -285,10 +368,25 @@ ApplicationWindow {
                     border.color: "lightgray"
 
                     Text {
-                        wrapMode: Text.Wrap
-                        anchors.centerIn: parent
+                        anchors.fill: parent
+                        anchors.margins: 5
                         text: display
+                        verticalAlignment: Text.AlignVCenter
                         elide: Text.ElideRight
+                        visible: column < tableView.columns - 1 // Hide for the last column
+                    }
+
+                    Button {
+                        anchors.fill: parent
+                        anchors.margins: 2
+                        text: "Action"
+                        visible: column === tableView.columns - 1 // Only show in the last column
+                        onClicked: {
+                            var shipData = shipDataModel.tableModel.getShipDataForRow(row);
+                            console.log("Action clicked for row:", row);
+                            console.log("Latitude:", shipData.latitude, "Longitude:", shipData.longitude);
+                            handleShipClick(shipData.latitude, shipData.longitude);
+                        }
                     }
                 }
 
@@ -347,6 +445,34 @@ ApplicationWindow {
 
 
         }
+    }
+
+    Timer {
+        id: hideMarkerTimer
+        interval: 5000 // 5 seconds
+        running: false
+        repeat: false
+        onTriggered: {
+            markerItem.visible = false;
+        }
+    }
+
+    // Define a function to handle the latitude and longitude
+    function handleShipClick(latitude, longitude) {
+        console.log("Received latitude:", latitude, "longitude:", longitude);
+
+        // Center the map on the clicked coordinates
+        mapview.center = QtPositioning.coordinate(latitude, longitude);
+        mapview.zoomLevel = 15;
+
+        // Update the marker position
+        markerItem.coordinate = QtPositioning.coordinate(latitude, longitude);
+
+        // Show the marker
+        markerItem.visible = true;
+
+        // Start the timer to hide the marker after 5 seconds
+        hideMarkerTimer.restart();
     }
 
     Component.onCompleted: {

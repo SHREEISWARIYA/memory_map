@@ -20,12 +20,12 @@ int ShipTableModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return m_headers.size();
+    return m_headers.size() + 1; // Add 1 for the button column
 }
 
 QVariant ShipTableModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || role != Qt::DisplayRole)
+    if (!index.isValid())
         return QVariant();
 
     int row = index.row();
@@ -35,10 +35,16 @@ QVariant ShipTableModel::data(const QModelIndex &index, int role) const
     if (actualIndex >= m_shipOrder.size())
         return QVariant();
 
-    QString uuid = m_shipOrder[actualIndex];
-    QString key = m_headers[col];
+    if (col < m_headers.size()) {
+        QString uuid = m_shipOrder[actualIndex];
+        QString key = m_headers[col];
+        return m_shipData[uuid][key].toVariant();
+    } else if (col == m_headers.size()) {
+        // This is our button column
+        return QVariant("Action");
+    }
 
-    return m_shipData[uuid][key].toVariant();
+    return QVariant();
 }
 
 QVariant ShipTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -46,8 +52,12 @@ QVariant ShipTableModel::headerData(int section, Qt::Orientation orientation, in
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (orientation == Qt::Horizontal && section < m_headers.size())
-        return m_headers[section];
+    if (orientation == Qt::Horizontal) {
+        if (section < m_headers.size())
+            return m_headers[section];
+        else if (section == m_headers.size())
+            return "Actions"; // Header for the button column
+    }
 
     return QVariant();
 }
@@ -81,4 +91,15 @@ void ShipTableModel::setPage(int page, int itemsPerPage)
     m_currentPage = page;
     m_itemsPerPage = itemsPerPage;
     endResetModel();
+}
+
+// Add this method to ShipTableModel class
+QJsonObject ShipTableModel::getShipDataForRow(int row) const
+{
+    int actualIndex = (m_currentPage - 1) * m_itemsPerPage + row;
+    if (actualIndex < m_shipOrder.size()) {
+        QString uuid = m_shipOrder[actualIndex];
+        return m_shipData[uuid];
+    }
+    return QJsonObject();
 }
