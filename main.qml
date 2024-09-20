@@ -3,12 +3,29 @@ import QtQuick.Controls.Universal
 import QtQuick.Layouts
 import QtLocation
 import QtPositioning
+import Qt.labs.platform as Platform
 
 ApplicationWindow {
+    id: window
     visible: true
-    width: 1024
-    height: 768
+    visibility: Window.FullScreen
+    width: 1920/2
+    height: 1080/2
     title: "Ship Tracking Map"
+
+    // Shortcut to toggle full screen
+    Shortcut {
+        sequences: ["Esc", "F11"]
+        onActivated: toggleFullScreen()
+    }
+
+    // Function to toggle full screen
+    function toggleFullScreen() {
+        if (window.visibility === Window.FullScreen)
+            window.showNormal();
+        else
+            window.showFullScreen();
+    }
 
     // Import the RightDock component
     RightDock {
@@ -79,38 +96,48 @@ ApplicationWindow {
             anchors.fill: parent
             hoverEnabled: true
             property var coordinate: mapview.toCoordinate(Qt.point(mouseX, mouseY))
+            property bool shipClicked: false
 
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked: function(mouse) {
+                if (!shipClicked) {
+                    shipLabel.visible = false;
+                    markerItem.visible = false;  // Hide the marker (ripple effect)
+                }
+                shipClicked = false;  // Reset the flag immediately after checking
+
                 if(typeDraw == 0) {
                     //console.log("nothing")
                 } else if(typeDraw == 1) {
                     pointspace.mapPointMark(mouse)
                 } else if(typeDraw == 2) {
-                    //console.log("line")
                     linespace.mapLineMark(mouse)
                 } else if(typeDraw == 3) {
-                    //console.log("polyon")
                     polygonspace.polygonMark(mouse)
                 } else if(typeDraw == 4) {
-                    //console.log("circle")
                     circlespace.circleMark(mouse)
                 } else {
                     console.log("invalid type")
                 }
             }
 
+            onPositionChanged: {
+                bottomBar.updateCoordinates(coordinate.latitude, coordinate.longitude)
+            }
+
             Label {
-                id: coordLabel
-                x: mapview.width - width
-                y: mapview.height - height
-                text: "lat: %1; lon: %2".arg(parent.coordinate.latitude).arg(parent.coordinate.longitude)
-                color: "black"
-                font.pixelSize: 12
-                background: Rectangle {
-                    color: "white"
-                    opacity: 0.5
-                }
+                            id: coordLabel
+                            x: mapview.width - width
+                            y: mapview.height - height
+                            text: "lat: %1; lon: %2".arg(parent.coordinate.latitude).arg(parent.coordinate.longitude)
+                            color: "black"
+                            font {
+                                pixelSize: 12
+                            }
+                            background: Rectangle {
+                                color: "white"
+                                opacity: 0.5
+                            }
             }
         }
 
@@ -134,35 +161,13 @@ ApplicationWindow {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
+                            mapview.children[0].shipClicked = true;  // Set the flag
                             console.log("Clicked MMSI:", shipDetails.mmsi);
                             console.log("Latitude:", shipDetails.latitude);
                             console.log("Longitude:", shipDetails.longitude);
 
                             if (shipDetails.latitude && shipDetails.longitude) {
-                                var coordinate = QtPositioning.coordinate(shipDetails.latitude, shipDetails.longitude);
-                                console.log("Created coordinate:", coordinate);
-
-                                if (markerItem) {
-                                    markerItem.coordinate = coordinate;
-                                    markerItem.visible = true;
-                                    console.log("Marker set to:", markerItem.coordinate);
-                                } else {
-                                    console.error("markerItem is not defined");
-                                }
-
-                                if (mapview) {
-                                    mapview.center = coordinate;
-                                    mapview.zoomLevel = 12;
-                                    console.log("Map centered at:", mapview.center);
-                                } else {
-                                    console.error("mapview is not defined");
-                                }
-
-                                if (hideMarkerTimer) {
-                                    hideMarkerTimer.restart();
-                                } else {
-                                    console.error("hideMarkerTimer is not defined");
-                                }
+                                handleShipClick(shipDetails.latitude, shipDetails.longitude, shipDetails.vessel_name, shipDetails.mmsi);
                             } else {
                                 console.error("Invalid latitude or longitude");
                             }
@@ -290,6 +295,51 @@ ApplicationWindow {
                 }
             }
         }
+
+        MapQuickItem {
+            id: shipLabel
+            visible: false
+            z: 1 // Ensure it's above other map items
+
+            sourceItem: Rectangle {
+                width: shipInfo.width + 20
+                height: shipInfo.height + 20
+                color: "black"
+                opacity: 0.7
+                radius: 5
+
+                Column {
+                    id: shipInfo
+                    anchors.centerIn: parent
+                    spacing: 2
+
+                    Text {
+                        id: shipNameText
+                        color: "white"
+                        font.pixelSize: 14
+                        font.bold: true
+                    }
+
+                    Text {
+                        id: shipMmsiText
+                        color: "white"
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        id: shipLatText
+                        color: "white"
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        id: shipLonText
+                        color: "white"
+                        font.pixelSize: 12
+                    }
+                }
+            }
+        }
     } //map ends
 
     ColumnLayout {
@@ -300,7 +350,7 @@ ApplicationWindow {
             text: "Fetch Ship Data"
             onClicked: {
                 shipDataModel.fetchShipData()
-                bottomDrawer.open()
+                bottomDrawer.show()
             }
             anchors.top: parent.top
             anchors.left: parent.left
@@ -314,12 +364,27 @@ ApplicationWindow {
         }
     }
 
-    Drawer {
+    Window {
         id: bottomDrawer
-        width: parent.width
-        height: parent.height * 0.4
-        edge: Qt.BottomEdge
+        //visibility: Window.FullScreen
+        visible: false
+        width: 960
+        height: 450
+        // width:parent.width/2
+        // height:parent.heigth/2
+        //edge: Qt.BottomEdge
+        Shortcut {
+            sequences: ["Esc","F11"]
+            onActivated: toggleFullScreen()
+        }
 
+        // Function to toggle full screen
+        function toggleFullScreen() {
+            if (bottomDrawer.visibility === Window.FullScreen)
+                bottomDrawer.showNormal();
+            else
+                bottomDrawer.showFullScreen();
+        }
         ColumnLayout {
             anchors.fill: parent
             spacing: 10
@@ -385,9 +450,10 @@ ApplicationWindow {
                                 bottomDrawer.close()
 
                                 console.log("Latitude:", shipData.latitude, "Longitude:", shipData.longitude);
-                                handleShipClick(shipData.latitude, shipData.longitude);
-
-
+                                handleShipClick(shipData.latitude, shipData.longitude, shipData.vessel_name, shipData.mmsi);
+                            } else {
+                                // Hide the ship name label when clicking elsewhere
+                                shipLabel.visible = false;
                             }
                         }
                     }
@@ -450,31 +516,12 @@ ApplicationWindow {
         }
     }
 
-    Timer {
-        id: hideMarkerTimer
-        interval: 5000 // 5 seconds
-        running: false
-        repeat: false
-        onTriggered: {
-            markerItem.visible = false;
-        }
-    }
-
-    // Define a function to handle the latitude and longitude
-    function handleShipClick(latitude, longitude) {
+    function handleShipClick(latitude, longitude, shipName, mmsi) {
         console.log("Received latitude:", latitude, "longitude:", longitude);
 
         if (latitude && longitude) {
             var coordinate = QtPositioning.coordinate(latitude, longitude);
             console.log("Created coordinate:", coordinate);
-
-            if (markerItem) {
-                markerItem.coordinate = coordinate;
-                markerItem.visible = true;
-                console.log("Marker set to:", markerItem.coordinate);
-            } else {
-                console.error("markerItem is not defined");
-            }
 
             if (mapview) {
                 mapview.center = coordinate;
@@ -484,11 +531,24 @@ ApplicationWindow {
                 console.error("mapview is not defined");
             }
 
-            if (hideMarkerTimer) {
-                hideMarkerTimer.restart();
-            } else {
-                console.error("hideMarkerTimer is not defined");
-            }
+            // Show and position the ship label
+            shipLabel.coordinate = coordinate;
+            shipLabel.sourceItem.children[0].children[0].text = "Name: " + shipName;
+            shipLabel.sourceItem.children[0].children[1].text = "MMSI: " + mmsi;
+            shipLabel.sourceItem.children[0].children[2].text = "Lat: " + latitude.toFixed(6);
+            shipLabel.sourceItem.children[0].children[3].text = "Lon: " + longitude.toFixed(6);
+            shipLabel.visible = true;
+
+            // Adjust these values to fine-tune the label position
+            var xOffset = 30;  // Pixels to the right
+            var yOffset = -50; // Pixels up
+
+            shipLabel.anchorPoint.x = -xOffset;
+            shipLabel.anchorPoint.y = shipLabel.sourceItem.height + yOffset;
+
+            // Show the marker (ripple effect)
+            markerItem.coordinate = coordinate;
+            markerItem.visible = true;
         } else {
             console.error("Invalid latitude or longitude");
         }
@@ -498,6 +558,123 @@ ApplicationWindow {
         console.log("QML component completed")
         shipData.fetchShips()
         shipDataModel.fetchShipData()
+        bottomBar.updateCoordinates(mapview.center.latitude, mapview.center.longitude)
     }
+
+    Rectangle {
+        id: bottomBar
+        width: parent.width
+        height: 50
+        color: "#282c34"
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        border.color: "#555555"
+        border.width: 1
+
+        function updateCoordinates(lat, lon) {
+            latitudeText.text = formatDMS(lat, true)
+            longitudeText.text = formatDMS(lon, false)
+        }
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 5
+            spacing: 10
+            anchors.verticalCenter: parent.verticalCenter
+
+            // Static Latitude and Longitude
+            Text {
+                text: "33° 54.6567' E"
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#FFFFFF"
+                Layout.alignment: Qt.AlignLeft
+                Layout.preferredWidth: 120
+            }
+
+            Text {
+                text: "151° 17.3950' N"
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#FFFFFF"
+                Layout.alignment: Qt.AlignLeft
+                Layout.preferredWidth: 120
+            }
+            Item { Layout.fillWidth: true } // This will take up all available space
+
+            // Dynamic Latitude and Longitude
+            Text {
+                id: latitudeText
+                text: formatDMS(mapview.center.latitude, true)
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#FFFFFF"
+                Layout.alignment: Qt.AlignLeft
+                Layout.preferredWidth: 220
+            }
+
+            Text {
+                id: longitudeText
+                text: formatDMS(mapview.center.longitude, false)
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#FFFFFF"
+                Layout.alignment: Qt.AlignLeft
+                Layout.preferredWidth: 220
+            }
+
+
+
+            // Additional Displays
+            Text {
+                id: speedText
+                text: "SOG: 0.0 kn"
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#00FF7F"
+                Layout.alignment: Qt.AlignRight
+                Layout.preferredWidth: 100
+            }
+
+            Text {
+                id: courseText
+                text: "COG: 0.0°"
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#00FF7F"
+                Layout.alignment: Qt.AlignRight
+                Layout.preferredWidth: 100
+            }
+
+            Text {
+                text: "Depth: 120 m"
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#1E90FF"
+                Layout.alignment: Qt.AlignRight
+                Layout.preferredWidth: 100
+            }
+
+            Text {
+                text: "Bearing: 270°"
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#1E90FF"
+                Layout.alignment: Qt.AlignRight
+                Layout.preferredWidth: 100
+            }
+        }
+    }
+    function formatDMS(coordinate, isLatitude) {
+        var absolute = Math.abs(coordinate);
+        var degrees = Math.floor(absolute);
+        var minutesNotTruncated = (absolute - degrees) * 60;
+        var minutes = minutesNotTruncated.toFixed(4);
+        var direction = isLatitude ? (coordinate >= 0 ? "E" : "W") : (coordinate >= 0 ? "N" : "S");
+
+        return degrees + "° " + minutes + "' " + direction;
+    }
+
+
 }
 

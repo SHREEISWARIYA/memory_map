@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include "shipdata.h"
 #include "shipdatamodel.h"
+#include "cursorcontroller.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,9 +16,12 @@ int main(int argc, char *argv[])
 
     ShipData shipData;
     ShipDataModel shipDataModel;
+    CursorController cursorController;
 
     engine.rootContext()->setContextProperty("shipData", &shipData);
     engine.rootContext()->setContextProperty("shipDataModel", &shipDataModel);
+    engine.rootContext()->setContextProperty("cursorController", &cursorController);
+
 
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
