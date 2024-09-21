@@ -127,9 +127,11 @@ debug/qrc_qml.cpp: ../../qml.qrc \
 		../../PaginationControl.qml \
 		../../previous_button.png \
 		../../trackList.png \
+		../../marker.png \
 		../../ship-2.png \
 		../../ship.png \
 		../../Pagination.qml \
+		../../BottomBar.qml \
 		../../main.qml \
 		../../close.png
 	C:\Qt\6.6.3\mingw_64\bin\rcc.exe -name qml --no-zstd ..\..\qml.qrc -o debug\qrc_qml.cpp
@@ -1049,7 +1051,9 @@ debug/main.o: ../../main.cpp ../../../../../../Qt/6.6.3/mingw_64/include/QtGui/Q
 		../../../../../../Qt/6.6.3/mingw_64/include/QtCore/QAbstractTableModel \
 		../../../../../../Qt/6.6.3/mingw_64/include/QtCore/qabstractitemmodel.h \
 		../../../../../../Qt/6.6.3/mingw_64/include/QtCore/QVector \
-		../../../../../../Qt/6.6.3/mingw_64/include/QtCore/qvector.h
+		../../../../../../Qt/6.6.3/mingw_64/include/QtCore/qvector.h \
+		../../cursorcontroller.h \
+		../../../../../../Qt/6.6.3/mingw_64/include/QtCore/QPoint
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\main.o ..\..\main.cpp
 
 debug/shipdata.o: ../../shipdata.cpp ../../shipdata.h \

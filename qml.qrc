@@ -10,5 +10,7 @@
         <file>trackList.png</file>
         <file>Pagination.qml</file>
         <file>PaginationControl.qml</file>
+        <file>BottomBar.qml</file>
+        <file>marker.png</file>
     </qresource>
 </RCC>

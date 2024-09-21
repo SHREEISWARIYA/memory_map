@@ -36,6 +36,28 @@ ApplicationWindow {
         return ship && ship.vessel_name && ship.latitude !== undefined && ship.longitude !== undefined;
     }
 
+        function calculateBearing(lat1, lon1, lat2, lon2) {
+            var toRadians = function(degree) {
+                return degree * Math.PI / 180;
+            }
+            var toDegrees = function(radian) {
+                return radian * 180 / Math.PI;
+            }
+
+            var dLon = toRadians(lon2 - lon1);
+            var lat1Rad = toRadians(lat1);
+            var lat2Rad = toRadians(lat2);
+
+            var y = Math.sin(dLon) * Math.cos(lat2Rad);
+            var x = Math.cos(lat1Rad) * Math.sin(lat2Rad) -
+                    Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+
+            var brng = toDegrees(Math.atan2(y, x));
+            brng = (brng + 180) % 360; // Normalize to 0-360
+            return brng.toFixed(1);
+        }
+
+
     Map {
         id: mapview
         anchors.fill: parent
@@ -123,6 +145,7 @@ ApplicationWindow {
 
             onPositionChanged: {
                 bottomBar.updateCoordinates(coordinate.latitude, coordinate.longitude)
+                updatePositionAndBearing(coordinate.latitude, coordinate.longitude)
             }
 
             Label {
@@ -266,7 +289,7 @@ ApplicationWindow {
 
             sourceItem: Image {
                 id: marker
-                source: "qrc:/marker.png" // Make sure you have this image in your resources
+                source: "qrc:/marker2.png" // Make sure you have this image in your resources
                 width: 40
                 height: 40
 
@@ -340,6 +363,21 @@ ApplicationWindow {
                 }
             }
         }
+
+        MapQuickItem {
+            id: fixedMarker
+            coordinate: QtPositioning.coordinate(-23.289792, 40.816407) // 23° 17.3875' S, 40° 48.9844' E
+            anchorPoint.x: image.width/2
+            anchorPoint.y: image.height
+            sourceItem: Image {
+                id: image2
+                source: "qrc:/marker.png" // Make sure to add a marker image to your resources
+                width: 32
+                height: 32
+            }
+        }
+
+
     } //map ends
 
     ColumnLayout {
@@ -561,110 +599,6 @@ ApplicationWindow {
         bottomBar.updateCoordinates(mapview.center.latitude, mapview.center.longitude)
     }
 
-    Rectangle {
-        id: bottomBar
-        width: parent.width
-        height: 50
-        color: "#282c34"
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        border.color: "#555555"
-        border.width: 1
-
-        function updateCoordinates(lat, lon) {
-            latitudeText.text = formatDMS(lat, true)
-            longitudeText.text = formatDMS(lon, false)
-        }
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.margins: 5
-            spacing: 10
-            anchors.verticalCenter: parent.verticalCenter
-
-            // Static Latitude and Longitude
-            Text {
-                text: "33° 54.6567' E"
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#FFFFFF"
-                Layout.alignment: Qt.AlignLeft
-                Layout.preferredWidth: 120
-            }
-
-            Text {
-                text: "151° 17.3950' N"
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#FFFFFF"
-                Layout.alignment: Qt.AlignLeft
-                Layout.preferredWidth: 120
-            }
-            Item { Layout.fillWidth: true } // This will take up all available space
-
-            // Dynamic Latitude and Longitude
-            Text {
-                id: latitudeText
-                text: formatDMS(mapview.center.latitude, true)
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#FFFFFF"
-                Layout.alignment: Qt.AlignLeft
-                Layout.preferredWidth: 220
-            }
-
-            Text {
-                id: longitudeText
-                text: formatDMS(mapview.center.longitude, false)
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#FFFFFF"
-                Layout.alignment: Qt.AlignLeft
-                Layout.preferredWidth: 220
-            }
-
-
-
-            // Additional Displays
-            Text {
-                id: speedText
-                text: "SOG: 0.0 kn"
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#00FF7F"
-                Layout.alignment: Qt.AlignRight
-                Layout.preferredWidth: 100
-            }
-
-            Text {
-                id: courseText
-                text: "COG: 0.0°"
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#00FF7F"
-                Layout.alignment: Qt.AlignRight
-                Layout.preferredWidth: 100
-            }
-
-            Text {
-                text: "Depth: 120 m"
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#1E90FF"
-                Layout.alignment: Qt.AlignRight
-                Layout.preferredWidth: 100
-            }
-
-            Text {
-                text: "Bearing: 270°"
-                font.pixelSize: 14
-                font.family: "Courier New"
-                color: "#1E90FF"
-                Layout.alignment: Qt.AlignRight
-                Layout.preferredWidth: 100
-            }
-        }
-    }
     function formatDMS(coordinate, isLatitude) {
         var absolute = Math.abs(coordinate);
         var degrees = Math.floor(absolute);
@@ -675,6 +609,17 @@ ApplicationWindow {
         return degrees + "° " + minutes + "' " + direction;
     }
 
+    function updatePositionAndBearing(lat, lon) {
+        var markerLat = fixedMarker.coordinate.latitude
+        var markerLon = fixedMarker.coordinate.longitude
+
+        bottomBar.updateCoordinates(lat, lon)
+        var bearing = calculateBearing(lat, lon, markerLat, markerLon)
+        bottomBar.updateBearing(bearing)
+    }
+
+    BottomBar {
+        id: bottomBar
+    }
 
 }
-
