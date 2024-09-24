@@ -17,7 +17,7 @@ void ShipDataModel::fetchShipData()
     emit isLoadingChanged();
 
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QNetworkRequest request(QUrl("http://localhost:3000/api/ships"));
+    QNetworkRequest request(QUrl("http://localhost:3000/api/ships/trackList"));
     QNetworkReply *reply = manager->get(request);
 
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
@@ -27,7 +27,9 @@ void ShipDataModel::fetchShipData()
         if (reply->error() == QNetworkReply::NoError) {
             QString response = reply->readAll();
             QJsonDocument jsonDoc = QJsonDocument::fromJson(response.toUtf8());
-            QJsonArray dataArray = jsonDoc["data"].toArray();
+            //QJsonArray dataArray = jsonDoc["data"].toArray();
+            QJsonArray dataArray = jsonDoc.array();
+
 
             m_shipData.clear();
             m_shipOrder.clear();  // Clear the order vector

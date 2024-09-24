@@ -1,10 +1,12 @@
 release/cursorcontroller.o
 release/main.o
+release/pasttrack.o
 release/shipdata.o
 release/shipdatamodel.o
 release/shiptablemodel.o
 release/qrc_qml.o
 release/moc_cursorcontroller.o
+release/moc_pasttrack.o
 release/moc_shipdata.o
 release/moc_shipdatamodel.o
 release/moc_shiptablemodel.o

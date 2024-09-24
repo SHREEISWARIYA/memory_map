@@ -32,11 +32,16 @@ ApplicationWindow {
         id: infoPanel // You can reference it by this ID
     }
 
-    function isValidShip(ship) {
-        return ship && ship.vessel_name && ship.latitude !== undefined && ship.longitude !== undefined;
+    // Import the Shipstable component
+    Shipstable {
+        id: bottomDrawer
     }
 
-        function calculateBearing(lat1, lon1, lat2, lon2) {
+    function isValidShip(ship) {
+        return ship && ship.track_name && ship.latitude !== undefined && ship.longitude !== undefined;
+    }
+
+    function calculateBearing(lat1, lon1, lat2, lon2) {
             var toRadians = function(degree) {
                 return degree * Math.PI / 180;
             }
@@ -56,6 +61,19 @@ ApplicationWindow {
             brng = (brng + 180) % 360; // Normalize to 0-360
             return brng.toFixed(1);
         }
+
+        // Add this function to calculate distance in nautical miles
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                var R = 6371; // Radius of the Earth in km
+                var dLat = (lat2 - lat1) * Math.PI / 180;
+                var dLon = (lon2 - lon1) * Math.PI / 180;
+                var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+                var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                var distanceKm = R * c;
+                return distanceKm * 0.539957; // Convert km to nautical miles
+            }
 
 
     Map {
@@ -146,6 +164,13 @@ ApplicationWindow {
             onPositionChanged: {
                 bottomBar.updateCoordinates(coordinate.latitude, coordinate.longitude)
                 updatePositionAndBearing(coordinate.latitude, coordinate.longitude)
+
+                // Calculate and update displacement
+                var displacement = calculateDistance(
+                    coordinate.latitude, coordinate.longitude,
+                    fixedMarker.coordinate.latitude, fixedMarker.coordinate.longitude
+                )
+                bottomBar.updateDisplacement(displacement.toFixed(2))
             }
 
             Label {
@@ -190,7 +215,7 @@ ApplicationWindow {
                             console.log("Longitude:", shipDetails.longitude);
 
                             if (shipDetails.latitude && shipDetails.longitude) {
-                                handleShipClick(shipDetails.latitude, shipDetails.longitude, shipDetails.vessel_name, shipDetails.mmsi);
+                                handleShipClick(shipDetails.latitude, shipDetails.longitude, shipDetails.track_name, shipDetails.mmsi);
                             } else {
                                 console.error("Invalid latitude or longitude");
                             }
@@ -254,7 +279,7 @@ ApplicationWindow {
                         onEntered: {
                             let shipDetails = shipData.getShipDetails(shipUuid);
                             mmsiText.text = "MMSI: " + shipDetails.mmsi;
-                            vesselNameText.text = "Vessel Name: " + shipDetails.vessel_name;
+                            vesselNameText.text = "Vessel Name: " + shipDetails.track_name;
                             latitudeText.text = "Latitude: " + shipDetails.latitude.toFixed(4);
                             longitudeText.text = "Longitude: " + shipDetails.longitude.toFixed(4);
                             hoverToolTip.visible = true; // Show the tooltip
@@ -269,6 +294,9 @@ ApplicationWindow {
                             shipData.printShipDetails(shipUuid);
                             infoPanel.currentShip = shipDetails;
                             infoPanel.visible = true; // Open the drawer when a ship is clicked
+
+                            // Fetch track history
+                            pastTrack.fetchTrackHistory(shipUuid, 900);
                         }
 
                         onExited: {
@@ -277,6 +305,16 @@ ApplicationWindow {
                     }
                 }
             }
+        }
+
+        Component {
+                id: mapCircleComponent
+                MapCircle {
+                    radius: 50
+                    color: 'red'
+                    border.color: 'black'
+                    border.width: 1
+                }
         }
 
         // Add this MapQuickItem for the marker
@@ -380,19 +418,62 @@ ApplicationWindow {
 
     } //map ends
 
-    ColumnLayout {
-        anchors.fill: parent
+    //SIDEBAR =============================================================================================================================================================================
+    Column {
         spacing: 10
+        padding: 6
+        anchors.top: parent.top
+        anchors.topMargin: 40
+
+        // Button {
+        //     text: "Fetch Ship Data"
+        //     onClicked: {
+        //         shipDataModel.fetchShipData()
+        //         bottomDrawer.show()
+        //     }
+        //     anchors.top: parent.top
+        //     anchors.left: parent.left
+        //     anchors.margins: 10
+        // }
+
+
 
         Button {
-            text: "Fetch Ship Data"
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555"  // Background color
+                radius: 8  // Rounded corners
+                border.color: "#666"  // Subtle border
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/ship-3.png"
+                height: 20
+                width:20
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
             onClicked: {
+                // Change theme logic
                 shipDataModel.fetchShipData()
                 bottomDrawer.show()
             }
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.margins: 10
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    // Change theme logic
+                    shipDataModel.fetchShipData()
+                    bottomDrawer.show()
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444"  // Darker on press
+                    } else {
+                        parent.background.color = "#555"  // Original color
+                    }
+                }
+            }
         }
 
         Text {
@@ -400,159 +481,280 @@ ApplicationWindow {
             text: "Loading..."
             Layout.alignment: Qt.AlignHCenter
         }
-    }
 
-    Window {
-        id: bottomDrawer
-        //visibility: Window.FullScreen
-        visible: false
-        width: 960
-        height: 450
-        // width:parent.width/2
-        // height:parent.heigth/2
-        //edge: Qt.BottomEdge
-        Shortcut {
-            sequences: ["Esc","F11"]
-            onActivated: toggleFullScreen()
-        }
-
-        // Function to toggle full screen
-        function toggleFullScreen() {
-            if (bottomDrawer.visibility === Window.FullScreen)
-                bottomDrawer.showNormal();
-            else
-                bottomDrawer.showFullScreen();
-        }
-        ColumnLayout {
-            anchors.fill: parent
-            spacing: 10
-
-            TableView {
-                id: tableView
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
-
-                model: shipDataModel.tableModel
-
-                columnWidthProvider: function(column) { return 150; }
-
-                // Header row
-                Row {
-                    id: headerRow
-                    y: tableView.contentY
-                    z: 2
-                    Repeater {
-                        model: tableView.columns
-                        Rectangle {
-                            width: tableView.columnWidthProvider(modelData)
-                            height: 35
-                            color: "lightgray"
-                            border.width: 1
-                            border.color: "gray"
-
-                            Text {
-
-                                anchors.centerIn: parent
-                                text:  shipDataModel.tableModel.headerData(modelData, Qt.Horizontal)
-                                font.bold: true
-                            }
-                        }
-                    }
-                }
-
-                // Data rows
-                delegate: Rectangle {
-                    implicitWidth: 150
-                    implicitHeight: 35
-                    border.width: 1
-                    border.color: "lightgray"
-
-                    Text {
-                        anchors.fill: parent
-                        anchors.margins: 5
-                        text: (display!="Action") ? display : ""
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                        color: column === 0 ? "blue" : "black" // Make MMSI blue to look like a hyperlink
-                        font.underline: column === 0 // Underline the MMSI
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: column === 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: {
-                            if (column === 0) { // Check if it's the MMSI column
-                                var shipData = shipDataModel.tableModel.getShipDataForRow(row);
-                                console.log("Clicked MMSI:", shipData.mmsi);
-                                bottomDrawer.close()
-
-                                console.log("Latitude:", shipData.latitude, "Longitude:", shipData.longitude);
-                                handleShipClick(shipData.latitude, shipData.longitude, shipData.vessel_name, shipData.mmsi);
-                            } else {
-                                // Hide the ship name label when clicking elsewhere
-                                shipLabel.visible = false;
-                            }
-                        }
-                    }
-                }
-
-                // Adjust the top margin to account for the header row
-                topMargin: headerRow.height
+        Button {
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555"  // Background color
+                radius: 8  // Rounded corners
+                border.color: "#666"  // Subtle border
+                border.width: 1
             }
-
-            // Pagination controls
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-
-
-
-
-                // Entries info text
-                Text {
-                    id: entriesInfoText
-                    Layout.alignment: Qt.AlignHCenter
-
-                    text: {
-                        if (shipDataModel.totalShips > 0) {
-                            var start = (shipDataModel.currentPage - 1) * shipDataModel.itemsPerPage + 1;
-                            var end = Math.min(start + shipDataModel.itemsPerPage - 1, shipDataModel.totalShips);
-                            return "Showing " + start + " to " + end + " of " + shipDataModel.totalShips + " entries";
-                        } else {
-                            return "Showing 0 to 0 of 0 entries";
-                        }
-                    }
-                }
-                Item {
-                        Layout.fillWidth: true // This will take up all available space
-                    }
-                PaginationControl {
-                    currentPage: shipDataModel.currentPage
-                    totalPages: Math.max(1, Math.ceil(shipDataModel.totalShips / shipDataModel.itemsPerPage))
-                    onPageChanged: shipDataModel.currentPage = page
-                }
-                Item {
-                        Layout.fillWidth: true // This will take up all available space
-                    }
-                RowLayout{
-                    Label { text: "Items per page:" }
-
-                    ComboBox {
-                        id: itemsPerPageComboBox
-                        model: [5, 10, 15, 20, 25, 30] // Options for items per page
-                        currentIndex: model.indexOf(shipDataModel.itemsPerPage)
-                        onCurrentIndexChanged: {
-                            shipDataModel.itemsPerPage = model[currentIndex];
-                        }
-                    }
-                }
-
+            contentItem: Image {
+                source: "qrc:/pencil.png"
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
+            onClicked: {
+                // Marker logic
 
             }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    // Marker logic
 
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444"  // Darker on press
+                    } else {
+                        parent.background.color = "#555"  // Original color
+                    }
+                }
+            }
+        }
 
+        Button {
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555"  // Background color
+                radius: 8  // Rounded corners
+                border.color: "#666"  // Subtle border
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/route.png"
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
+            onClicked: {
+                // Marker logic
+
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    // Marker logic
+
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444"  // Darker on press
+                    } else {
+                        parent.background.color = "#555"  // Original color
+                    }
+                }
+            }
+        }
+
+        Button {
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555"  // Background color
+                radius: 8  // Rounded corners
+                border.color: "#666"  // Subtle border
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/changetheme.png"
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
+            onClicked: {
+                // Marker logic
+
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    // Marker logic
+
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444"  // Darker on press
+                    } else {
+                        parent.background.color = "#555"  // Original color
+                    }
+                }
+            }
+        }
+
+        Button {
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555"  // Background color
+                radius: 8  // Rounded corners
+                border.color: "#666"  // Subtle border
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/settings.png"
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
+            onClicked: {
+                // Marker logic
+
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    // Marker logic
+
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444"  // Darker on press
+                    } else {
+                        parent.background.color = "#555"  // Original color
+                    }
+                }
+            }
+        }
+
+        Button {
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555"  // Background color
+                radius: 8  // Rounded corners
+                border.color: "#666"  // Subtle border
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/help.png"
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
+            onClicked: {
+                // Marker logic
+
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    // Marker logic
+
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444"  // Darker on press
+                    } else {
+                        parent.background.color = "#555"  // Original color
+                    }
+                }
+            }
+        }
+
+        Button {
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555"  // Background color
+                radius: 8  // Rounded corners
+                border.color: "#666"  // Subtle border
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/trackList.png"
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
+            onClicked: {
+                // Marker logic
+
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    // Marker logic
+
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444"  // Darker on press
+                    } else {
+                        parent.background.color = "#555"  // Original color
+                    }
+                }
+            }
         }
     }
+
+    // ===================================================================================================================================================================
+
+    Button {
+        text: "my ship"
+        onClicked: {
+
+        }
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.topMargin: 10
+        anchors.rightMargin: 10
+        MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+
+                    onClicked: {
+                        // Center the map on the fixedMarker's coordinate
+                        mapview.center = fixedMarker.coordinate
+                        mapview.zoomLevel = 15 // Optional: Adjust the zoom level as needed
+                    }
+
+                    onPressed: parent.scale = 0.95
+                    onReleased: parent.scale = 1.0
+
+                    onEntered: parent.opacity = 0.8
+                    onExited: parent.opacity = 1.0
+                }
+    }
+
+
+
+    // function handleTrackHistoryFetched(trackHistory) {
+    //         console.log(" ******************************************** Track history fetched: ***", trackHistory);
+
+    //         // Remove previous circles
+    //         for (var i = mapview.children.length - 1; i >= 0; i--) {
+    //             if (mapview.children[i] instanceof MapCircle) {
+    //                 mapview.children[i].destroy();
+    //             }
+    //         }
+
+    //         // Add new circles
+    //         var trackList = trackHistory.trackHistory;
+    //         for (i = 0; i < trackList.length; i++) {
+    //             var point = trackList[i];
+    //             var coordinate = QtPositioning.coordinate(point.latitude, point.longitude);
+    //             console.log("Creating MapCircle at:", coordinate);
+
+    //             // Add a circle for each point
+    //             var mapCircle = mapCircleComponent.createObject(mapview, {
+    //                 center: coordinate
+    //             });
+    //             if (mapCircle === null) {
+    //                 console.error("Failed to create MapCircle");
+    //             } else {
+    //                 console.log("MapCircle created at:", coordinate);
+    //             }
+    //         }
+
+    //         // Center the map on the first point
+    //         if (trackList.length > 0) {
+    //             mapview.center = QtPositioning.coordinate(trackList[0].latitude, trackList[0].longitude);
+    //         }
+    //     }
+
+
+
 
     function handleShipClick(latitude, longitude, shipName, mmsi) {
         console.log("Received latitude:", latitude, "longitude:", longitude);
@@ -563,7 +765,7 @@ ApplicationWindow {
 
             if (mapview) {
                 mapview.center = coordinate;
-                mapview.zoomLevel = 15;
+                mapview.zoomLevel = 10;
                 console.log("Map centered at:", mapview.center);
             } else {
                 console.error("mapview is not defined");
@@ -616,10 +818,35 @@ ApplicationWindow {
         bottomBar.updateCoordinates(lat, lon)
         var bearing = calculateBearing(lat, lon, markerLat, markerLon)
         bottomBar.updateBearing(bearing)
+
+        // Calculate and update displacement
+            var displacement = calculateDistance(lat, lon, markerLat, markerLon)
+            //console.log("Calculated displacement in updatePositionAndBearing:", displacement.toFixed(2))
+            bottomBar.currentDisplacement = displacement  // Update this line
     }
+
+    // ... existing code ...
+
+
+    // ... existing code ...
 
     BottomBar {
         id: bottomBar
+
+        // Add this property
+            property real currentDisplacement: 0
+
+            // Modify the updateDisplacement function
+            function updateDisplacement(displacement) {
+                //console.log("BottomBar updateDisplacement called in main.qml:", displacement)
+                currentDisplacement = displacement
+            }
+
+            onFetchShipDataRequested: {
+                    shipDataModel.fetchShipData()
+                    bottomDrawer.open()
+            }
     }
 
 }
+

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls 2.15
 
 Rectangle {
     id: bottomBar
@@ -11,6 +12,10 @@ Rectangle {
     border.color: "#555555"
     border.width: 1
 
+    // Define the signal here
+    signal fetchShipDataRequested()
+
+
     function updateCoordinates(lat, lon) {
         latitudeText.text = formatDMS(lat, true)
         longitudeText.text = formatDMS(lon, false)
@@ -18,7 +23,16 @@ Rectangle {
 
     function updateBearing(bearing) {
         bearingText.text = "Bearing: " + bearing + "°"
+    } 
+
+    // Add this property
+    property real currentDisplacement: 0
+
+    onCurrentDisplacementChanged: {
+            console.log("BottomBar displacement changed:", currentDisplacement)
+            displacementText.text = "Displacement: " + currentDisplacement.toFixed(2) + " Nmi"
     }
+
 
     RowLayout {
         anchors.fill: parent
@@ -26,13 +40,48 @@ Rectangle {
         spacing: 10
         anchors.verticalCenter: parent.verticalCenter
 
-        Text {
+        Button {
+            id: shipButton
             text: "Ship"
-            font.pixelSize: 14
-            font.family: "Courier New"
-            color: "#FFFFFF"
             Layout.alignment: Qt.AlignLeft
-            Layout.preferredWidth: 40
+            Layout.preferredWidth: 80
+            Layout.preferredHeight: 40
+
+            background: Rectangle {
+                color: shipButton.pressed ? "#3a3a3a" : "#4a4a4a"
+                radius: 20
+                border.color: "#555555"
+                border.width: 1
+
+                layer.enabled: true
+            }
+
+            contentItem: Text {
+                text: shipButton.text
+                font.pixelSize: 14
+                font.family: "Courier New"
+                color: "#FFFFFF"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+
+                onClicked: {
+                    // Add your click handling logic here
+                    console.log("Ship button clicked")
+                    bottomBar.fetchShipDataRequested()
+                }
+
+                onPressed: parent.scale = 0.95
+                onReleased: parent.scale = 1.0
+
+                onEntered: parent.opacity = 0.8
+                onExited: parent.opacity = 1.0
+            }
         }
 
         // Static Latitude and Longitude
@@ -100,7 +149,18 @@ Rectangle {
             color: "#1E90FF"
             Layout.alignment: Qt.AlignRight
             Layout.preferredWidth: 120
-        }
+        } 
+
+        Text {
+                    id: displacementText
+                    text: "Displacement: 0 Nmi"
+                    font.pixelSize: 14
+                    font.family: "Courier New"
+                    color: "#FFFFFF"
+                    Layout.alignment: Qt.AlignRight
+                    Layout.preferredWidth: 150
+                }
+        
     }
 
     function formatDMS(coordinate, isLatitude) {

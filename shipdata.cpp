@@ -18,7 +18,7 @@ ShipData::ShipData(QObject *parent)
 
 void ShipData::fetchShips()
 {
-    QUrl url("http://localhost:3000/api/ships");
+    QUrl url("http://localhost:3000/api/ships/trackList");
     QNetworkRequest request(url);
     qDebug() << "Fetching ships from URL:" << url.toString();
     m_networkManager->get(request);
@@ -28,7 +28,7 @@ void ShipData::onNetworkReply(QNetworkReply *reply)
 {
     if (reply->error() == QNetworkReply::NoError) {
         QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll());
-        QJsonArray jsonArray = jsonDoc.object()["data"].toArray();
+        QJsonArray jsonArray = jsonDoc.array();
 
         qDebug() << "Received" << jsonArray.size() << "ships from API";
 
@@ -42,9 +42,9 @@ void ShipData::onNetworkReply(QNetworkReply *reply)
             // Handle MMSI as a number
             QString mmsi = QString::number(obj["mmsi"].toInt());
 
-            qDebug() << "Processing ship:";
-            qDebug() << "  UUID:" << uuid;
-            qDebug() << "  MMSI:" << mmsi;
+            // qDebug() << "Processing ship:";
+            // qDebug() << "  UUID:" << uuid;
+            // qDebug() << "  MMSI:" << mmsi;
 
             QVariantMap shipData;
             for (auto it = obj.constBegin(); it != obj.constEnd(); ++it) {
@@ -67,7 +67,7 @@ void ShipData::onNetworkReply(QNetworkReply *reply)
         qDebug() << "Final m_mmsiUuidMap size:" << m_mmsiUuidMap.size();
         qDebug() << "Contents of m_mmsiUuidMap:";
         for (auto it = m_mmsiUuidMap.constBegin(); it != m_mmsiUuidMap.constEnd(); ++it) {
-            qDebug() << "MMSI:" << it.key() << "UUID:" << it.value();
+            //qDebug() << "MMSI:" << it.key() << "UUID:" << it.value();
         }
 
         m_totalShips = m_ships.count();
@@ -99,7 +99,7 @@ QVariantList ShipData::shipList() const
 QVariantMap ShipData::isValidShip(const QString &uuid) const
 {
     if (m_ships.contains(uuid) &&
-        m_ships[uuid].contains("vessel_name") &&
+        m_ships[uuid].contains("track_name") &&
         m_ships[uuid].contains("latitude") &&
         m_ships[uuid].contains("longitude"))
     {

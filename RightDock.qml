@@ -38,7 +38,7 @@ Drawer {
             text: {
                 if (!infoPanel.currentShip) return "Click on a ship to see details";
                 let ship = infoPanel.currentShip;
-                let vesselName = ship.vessel_name.trim();
+                let vesselName = ship.track_name.trim();
                 let mmsi = ship.mmsi !== undefined ? `MMSI: ${ship.mmsi}` : "MMSI: N/A";
                 let imo = ship.imo !== undefined ? (ship.imo !== null ? `IMO: ${ship.imo}` : "IMO: Not Assigned") : "IMO: N/A";
                 let lat = `Lat: ${ship.latitude.toFixed(4)}`;
@@ -49,5 +49,6 @@ Drawer {
             }
             font.pixelSize: 12
         }
+
     }
 }

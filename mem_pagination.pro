@@ -7,6 +7,7 @@ QT += quick
 SOURCES += \
         cursorcontroller.cpp \
         main.cpp \
+        pasttrack.cpp \
         shipdata.cpp \
         shipdatamodel.cpp \
         shiptablemodel.cpp
@@ -26,6 +27,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     cursorcontroller.h \
+    pasttrack.h \
     shipdata.h \
     shipdatamodel.h \
     shiptablemodel.h
