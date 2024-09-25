@@ -4,7 +4,8 @@
 #include "shipdata.h"
 #include "shipdatamodel.h"
 #include "cursorcontroller.h"
-#include "pastTrack.h"
+//#include "pastTrack.h"
+#include "pastTrail.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,15 +16,21 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    //qmlRegisterType<PastTrail>("com.example", 1, 0, "PastTrail");
+
     ShipData shipData;
     ShipDataModel shipDataModel;
     CursorController cursorController;
-    PastTrack pastTrack;
+    //PastTrack pastTrack;
+    PastTrail pastTrail;
+
+
 
     engine.rootContext()->setContextProperty("shipData", &shipData);
     engine.rootContext()->setContextProperty("shipDataModel", &shipDataModel);
     engine.rootContext()->setContextProperty("cursorController", &cursorController);
-    engine.rootContext()->setContextProperty("pastTrack", &pastTrack);
+    //engine.rootContext()->setContextProperty("pastTrack", &pastTrack);
+    engine.rootContext()->setContextProperty("pastTrail", &pastTrail);
 
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
