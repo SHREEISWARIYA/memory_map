@@ -1,4 +1,6 @@
 #include "ShipTableModel.h"
+#include <QDateTime>
+#include <QTimeZone>
 
 ShipTableModel::ShipTableModel(QObject *parent)
     : QAbstractTableModel(parent)
@@ -26,6 +28,42 @@ int ShipTableModel::columnCount(const QModelIndex &parent) const
     return m_headers.size();
 }
 
+// QVariant ShipTableModel::data(const QModelIndex &index, int role) const
+// {
+//     if (!index.isValid() || role != Qt::DisplayRole)
+//         return QVariant();
+
+//     int row = index.row();
+//     int col = index.column();
+//     int actualIndex = (m_currentPage - 1) * m_itemsPerPage + row;
+
+//     if (actualIndex >= m_shipOrder.size())
+//         return QVariant();
+
+//     if (col < m_headers.size()) {
+//         QString uuid = m_shipOrder[actualIndex];
+//         QString key = m_headers[col];
+//         //qDebug() << "Accessing data for key:" << key << "uuid:" << uuid;
+//         if (key == "latitude" || key == "longitude") {
+//             QJsonValue value = m_shipData[uuid][key];
+//             if (value.isDouble()) {
+//                 double doubleValue = value.toDouble();
+//                 QString dmsValue = decimalToDMS(doubleValue, key == "latitude");
+//                 qDebug() << "Converting" << key << doubleValue << "to DMS:" << dmsValue;
+//                 return dmsValue;
+//             } else {
+//                 qDebug() << "Failed to convert" << key << "to double. Value:" << value.toString();
+//             }
+//         }
+//         return m_shipData[uuid][key].toVariant();
+//     }
+//     else if (col == m_headers.size()) {
+//         return QVariant("Action");
+//     }
+
+//     return QVariant();
+// }
+
 QVariant ShipTableModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || role != Qt::DisplayRole)
@@ -41,13 +79,15 @@ QVariant ShipTableModel::data(const QModelIndex &index, int role) const
     if (col < m_headers.size()) {
         QString uuid = m_shipOrder[actualIndex];
         QString key = m_headers[col];
-        //qDebug() << "Accessing data for key:" << key << "uuid:" << uuid;
-        if (key == "latitude" || key == "longitude") {
+
+        if (key == "created_at") {
+            return formatTimestamp(m_shipData[uuid][key].toVariant());
+        }
+        else if (key == "latitude" || key == "longitude") {
             QJsonValue value = m_shipData[uuid][key];
             if (value.isDouble()) {
                 double doubleValue = value.toDouble();
                 QString dmsValue = decimalToDMS(doubleValue, key == "latitude");
-                qDebug() << "Converting" << key << doubleValue << "to DMS:" << dmsValue;
                 return dmsValue;
             } else {
                 qDebug() << "Failed to convert" << key << "to double. Value:" << value.toString();
@@ -145,4 +185,35 @@ QString ShipTableModel::decimalToDMS(double decimal, bool isLatitude)
         .arg(minutes, 2, 10, QChar('0'))
         .arg(seconds, 4, 'f', 1, QChar('0'))
         .arg(direction);
+}
+
+QString ShipTableModel::formatTimestamp(const QVariant &timestamp) const
+{
+    bool ok;
+    qint64 msecsSinceEpoch = timestamp.toLongLong(&ok);
+
+    QDateTime dateTime;
+    if (ok) {
+        dateTime = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch);
+    } else {
+        dateTime = QDateTime::fromString(timestamp.toString(), Qt::ISODate);
+        if (!dateTime.isValid()) {
+            QStringList formats = {"yyyy-MM-dd hh:mm:ss", "MM/dd/yyyy hh:mm:ss"};
+            for (const QString &format : formats) {
+                dateTime = QDateTime::fromString(timestamp.toString(), format);
+                if (dateTime.isValid()) break;
+            }
+        }
+    }
+
+    if (!dateTime.isValid()) {
+        qWarning() << "Failed to parse timestamp:" << timestamp;
+        return timestamp.toString();
+    }
+
+    // Convert to local time
+    dateTime = dateTime.toLocalTime();
+
+    // Format the date and time in a single line
+    return dateTime.toString("dd MMM yyyy hh:mm:ss");
 }

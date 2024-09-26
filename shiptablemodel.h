@@ -30,6 +30,7 @@ private:
     int m_currentPage = 1;
     int m_itemsPerPage = 10;
     static QString decimalToDMS(double decimal, bool isLatitude);
+    QString formatTimestamp(const QVariant &timestamp) const;
 };
 
 #endif // SHIPTABLEMODEL_H

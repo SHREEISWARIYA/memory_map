@@ -33,6 +33,13 @@ Drawer {
 
                 columnWidthProvider: function(column) { return 150; }
 
+                // columnWidthProvider: function(column) {
+                //     if (tableView.model.headerData(column, Qt.Horizontal) === "created_at") {
+                //         return 190; // Increase this value as needed
+                //     }
+                //     return 150; // default width for other columns
+                // }
+
                 // Header row
                 Row {
                     id: headerRow
@@ -58,7 +65,9 @@ Drawer {
 
                 // Data rows
                 delegate: Rectangle {
-                    implicitWidth: 150
+                    // implicitWidth: 150
+                    // implicitHeight: 35
+                    implicitWidth: tableView.columnWidthProvider(column)
                     implicitHeight: 35
                     border.width: 1
                     border.color: "lightgray"
