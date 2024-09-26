@@ -83,6 +83,12 @@ void ShipTableModel::setShipData(const QMap<QString, QJsonObject> &shipData, con
         m_headers = m_shipData.first().keys();
         // Ensure MMSI is the first column
         m_headers.removeAll("mmsi");
+        m_headers.removeAll("track_name");
+        m_headers.removeAll("latitude");
+        m_headers.removeAll("longitude");
+        m_headers.prepend("longitude");
+        m_headers.prepend("latitude");
+        m_headers.prepend("track_name");
         m_headers.prepend("mmsi");
     }
     endResetModel();
@@ -105,4 +111,22 @@ QJsonObject ShipTableModel::getShipDataForRow(int row) const
         return m_shipData[uuid];
     }
     return QJsonObject();
+}
+
+QString ShipTableModel::decimalToDMS(double decimal, bool isLatitude)
+{
+    int degrees = static_cast<int>(std::abs(decimal));
+    double minutesDecimal = (std::abs(decimal) - degrees) * 60;
+    int minutes = static_cast<int>(minutesDecimal);
+    double seconds = (minutesDecimal - minutes) * 60;
+
+    QString direction = isLatitude ?
+                            (decimal >= 0 ? "N" : "S") :
+                            (decimal >= 0 ? "E" : "W");
+
+    return QString("%1°%2'%3\"%4")
+        .arg(degrees)
+        .arg(minutes, 2, 10, QChar('0'))
+        .arg(seconds, 4, 'f', 1, QChar('0'))
+        .arg(direction);
 }

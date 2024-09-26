@@ -8,7 +8,7 @@ Rectangle {
     height: 50
     color: "#282c34"
     anchors.bottom: parent.bottom
-    anchors.bottomMargin: 20
+    //anchors.bottomMargin: 20
     border.color: "#555555"
     border.width: 1
 

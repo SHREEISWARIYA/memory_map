@@ -1,11 +1,13 @@
 release/cursorcontroller.o
 release/main.o
+release/pasthistory.o
 release/pasttrail.o
 release/shipdata.o
 release/shipdatamodel.o
 release/shiptablemodel.o
 release/qrc_qml.o
 release/moc_cursorcontroller.o
+release/moc_pasthistory.o
 release/moc_pasttrail.o
 release/moc_shipdata.o
 release/moc_shipdatamodel.o

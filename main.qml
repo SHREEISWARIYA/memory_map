@@ -5,7 +5,10 @@ import QtLocation
 import QtPositioning
 import Qt.labs.platform as Platform
 import QtQuick.Shapes 1.15
+import Qt5Compat.GraphicalEffects // Make sure to import this at the top of your QML file
+
 //import com.example 1.0
+
 
 ApplicationWindow {
     id: window
@@ -29,10 +32,37 @@ ApplicationWindow {
             window.showFullScreen();
     }
 
-    // Import the RightDock component
+
+    // // Import the RightDock component
+    // RightDock {
+    //     id: infoPanel // You can reference it by this ID
+    //     mapView: mapview // Make sure this matches your Map id
+    //     pastTrail: pastTrail
+    // }
+
+    // main.qml
     RightDock {
-        id: infoPanel // You can reference it by this ID
+        id: infoPanel
+        onHidePastTrackRequested: {
+                hidePastTrack()
+            }
     }
+
+    Connections {
+            target: infoPanel
+            function onFetchTrackHistoryRequested(uuid) {
+                console.log("Main.qml: Fetching track history for UUID:", uuid)
+                pastTrail.fetchTrackHistory(uuid, 48)
+            }
+            function onShipDetailsRequested(name, latitude, longitude) {
+                    console.log(" ****Ship details requested: ***")
+                    console.log(" $$ Name:", name)
+                    console.log(" $$ Latitude:", latitude)
+                    console.log(" $$ Longitude:", longitude)
+                    // You can add any additional processing here, such as updating the map or other UI elements
+                    markShipOnMap(name, latitude, longitude)
+            }
+        }
 
     // Import the Shipstable component
     Shipstable {
@@ -80,53 +110,32 @@ ApplicationWindow {
             Connections {
                     target: pastTrail
                     onTrackHistoryFetched: handleTrackHistoryFetched(uuid, trackHistory)
-                }
+            }
 
-            // function handleTrackHistoryFetched(uuid, trackHistory) {
-            //     console.log("**********************Track history fetched for UUID:", uuid);
-            //     console.log("Track history length:", trackHistory.length);
-
-            //     // Print all latitude and longitude coordinates
-            //     for (var i = 0; i < trackHistory.length; i++) {
-            //         var point = trackHistory[i];
-            //         console.log("Point", i + 1, "- Latitude:", point.latitude, "Longitude:", point.longitude);
-            //     }
-            // }
             function handleTrackHistoryFetched(uuid, trackHistory) {
                 console.log("**********************Track history fetched for UUID:", uuid);
                 console.log("Track history length:", trackHistory.length);
 
-                // Remove previous track history points and lines
+                // Remove previous track history lines
                 var removedCount = 0;
                 for (var i = mapview.mapItems.length - 1; i >= 0; i--) {
-                    if (mapview.mapItems[i].objectName === "trackHistoryPoint" || mapview.mapItems[i].objectName === "trackHistoryLine") {
+                    if (mapview.mapItems[i].objectName === "trackHistoryLine") {
                         mapview.removeMapItem(mapview.mapItems[i]);
                         removedCount++;
                     }
                 }
-                console.log("Removed", removedCount, "previous track history items");
+                console.log("Removed", removedCount, "previous track history lines");
 
                 // Create the path for the line
                 var path = [];
 
-                // Add new track history points
-                var addedCount = 0;
+                // Add coordinates to the path
                 for (i = 0; i < trackHistory.length; i++) {
                     var point = trackHistory[i];
                     console.log("Point", i + 1, "- Latitude:", point.latitude, "Longitude:", point.longitude);
 
                     var coordinate = QtPositioning.coordinate(point.latitude, point.longitude);
-
-                    // Add coordinate to the path
                     path.push(coordinate);
-
-                    var marker = shipMarkerComponent.createObject(mapview, {
-                        objectName: "trackHistoryPoint",
-                        coordinate: coordinate
-                    });
-
-                    mapview.addMapItem(marker);
-                    addedCount++;
                 }
 
                 // Create and add the line
@@ -136,9 +145,10 @@ ApplicationWindow {
                         path: path
                     });
                     mapview.addMapItem(line);
+                    console.log("Added track history line with", path.length, "points");
+                } else {
+                    console.log("Not enough points to create a line");
                 }
-
-                console.log("Added", addedCount, "new track history points and a line");
 
                 // Center the map on the first point of the track history
                 if (trackHistory.length > 0) {
@@ -151,32 +161,169 @@ ApplicationWindow {
             }
 
             Component {
-                id: shipMarkerComponent
+                id: dottedLineComponent
+                MapPolyline {
+                    line.width: 3
+                    line.color: "red"
+                }
+            }
+
+            Component {
+                id: highlightCircleComponent
                 MapQuickItem {
-                    id: markerItem
                     anchorPoint.x: circle.width/2
                     anchorPoint.y: circle.height/2
                     sourceItem: Rectangle {
                         id: circle
-                        width: 10  // Adjust size as needed
-                        height: 10 // Adjust size as needed
-                        color: "blue"
-                        border.color: "darkBlue"
-                        border.width: 1
-                        radius: width/2  // This makes the rectangle circular
+                        width: 40
+                        height: 40
+                        radius: width  // This makes the rectangle circular
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 3
+                        opacity: 0.7
+
                     }
                     zoomLevel: 0
                 }
             }
 
             Component {
-                id: dottedLineComponent
-                MapPolyline {
-                    line.width: 3
-                    line.color: "green"
+                id: shipLabelComponent
+                MapQuickItem {
+                    anchorPoint.x: text.width/2
+                    anchorPoint.y: text.height + 25  // Adjusted to be closer to the circle
+                    sourceItem: Text {
+                        id: text
+                        font.pixelSize: 14
+                        font.bold: true
+                        color: "white"
+                        style: Text.Outline
+                        styleColor: "black"
+                    }
+                    zoomLevel: 0
                 }
             }
 
+            function hidePastTrack() {
+                // Remove all track history lines and ship markers
+                for (var i = mapview.mapItems.length - 1; i >= 0; i--) {
+                    var item = mapview.mapItems[i];
+                    if (item.objectName === "trackHistoryLine" ||
+                        (item.objectName && item.objectName.startsWith("shipMarker_") || item.objectName.startsWith("shipLabel_"))) {
+                        mapview.removeMapItem(item);
+                    }
+                }
+
+                // Hide the ship label and marker item
+                shipLabel.visible = false;
+                markerItem.visible = false;
+
+                console.log("Past track and ship markers hidden");
+            }
+
+            function markShipOnMap(name, latitude, longitude) {
+                console.log(" @@ Marking ship on map:", name, "at", latitude, longitude)
+
+                if (!mapview) {
+                    console.error("Map object is not defined")
+                    return
+                }
+
+                // Remove any existing ship markers with the same name
+                for (var i = mapview.mapItems.length - 1; i >= 0; i--) {
+                    if (mapview.mapItems[i].objectName === "shipMarker_" + name) {
+                        mapview.removeMapItem(mapview.mapItems[i])
+                    }
+                }
+
+                // Create a new MapQuickItem
+                var marker = markerComponent.createObject(mapview, {
+                    coordinate: QtPositioning.coordinate(latitude, longitude),
+                    objectName: "shipMarker_" + name
+                })
+
+                if (marker) {
+                    mapview.addMapItem(marker)
+                    console.log("Added new marker for", name, "at", latitude, longitude)
+                } else {
+                    console.error("Failed to create marker for", name)
+                }
+
+                // Create a new MapQuickItem for the ship label
+                    var label = shipLabelComponent2.createObject(mapview, {
+                        coordinate: QtPositioning.coordinate(latitude, longitude),
+                        objectName: "shipLabel_" + name
+                    })
+
+                    if (label) {
+                        label.sourceItem.children[0].text = name
+                        mapview.addMapItem(label)
+                        console.log("Added new label for", name)
+                    } else {
+                        console.error("Failed to create label for", name)
+                    }
+
+                // Center the map on the ship's position
+                mapview.center = QtPositioning.coordinate(latitude, longitude)
+                mapview.zoomLevel = 14  // Adjust this value as needed
+
+                console.log("Map centered at", mapview.center.latitude, mapview.center.longitude, "with zoom level", mapview.zoomLevel)
+                console.log("Total map items:", mapview.mapItems.length)
+            }
+
+            Component {
+                id: markerComponent
+                MapQuickItem {
+                    anchorPoint.x: rect.width/2
+                    anchorPoint.y: rect.height/2
+
+                    sourceItem: Rectangle {
+                        id: rect
+                        width: 20
+                        height: 20
+                        color: "transparent"  // You can change this color as needed
+                        border.color: "blue"
+                        border.width: 2
+                        radius: width/2  // This makes the rectangle circular
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                console.log("Clicked ship:", parent.parent.objectName)
+                                // You can add more functionality here if needed
+                            }
+                        }
+
+
+                    }
+                }
+            }
+            // Add this component definition somewhere in your QML file, outside of any function
+            Component {
+                id: shipLabelComponent2
+                MapQuickItem {
+                    anchorPoint.x: labelBox.width /2
+                    anchorPoint.y: labelBox.height +10
+
+                    sourceItem: Rectangle {
+                        id: labelBox
+                        width: shipNameText.width + 10
+                        height: shipNameText.height + 6
+                        color: "white"
+                        border.color: "black"
+                        border.width: 1
+                        radius: 3
+
+                        Text {
+                            id: shipNameText
+                            anchors.centerIn: parent
+                            font.pixelSize: 12
+                            font.bold: true
+                        }
+                }   }
+            }
     //MAP starts
     Map {
         id: mapview
@@ -294,6 +441,7 @@ ApplicationWindow {
         MapItemView {
             model: shipData.shipList
             delegate: MapQuickItem {
+                property color string
                 id: shipItem
                 property var shipDetails: shipData.getShipDetails(modelData.uuid)
                 visible: shipData.isValidShip(modelData.uuid)
@@ -301,11 +449,37 @@ ApplicationWindow {
                 anchorPoint.x: image.width/2
                 anchorPoint.y: image.height/2
 
+
+
                 sourceItem: Image {
-                    id: image
-                    source: "qrc:/ship.png"
-                    width: 18
-                    height: 16
+
+                    // id: image
+                    // //source: "qrc:/ship.png"
+                    // source: "qrc:/cargo.svg"
+                    // width: 30
+                    // height: 10
+                    // anchors.fill: parent
+                    // fillMode: Image.PreserveAspectFit
+
+                    id: container
+                                width: getSizeForZoomLevel(mapview.zoomLevel)
+                                height: width / 3  // Maintain aspect ratio
+
+                                function getSizeForZoomLevel(zoomLevel) {
+                                    // Define sizes for specific zoom levels
+                                    if (zoomLevel <= 5) return 10
+                                    if (zoomLevel <= 10) return 20
+                                    if (zoomLevel <= 15) return 30
+                                    if (zoomLevel <= 20) return 40
+                                    return 50  // For zoom levels > 20
+                                }
+
+                                Image {
+                                    id: image
+                                    source: "qrc:/cargo.svg"
+                                    anchors.fill: parent
+                                    fillMode: Image.PreserveAspectFit
+                                }
 
                     MouseArea {
                         anchors.fill: parent
@@ -322,6 +496,7 @@ ApplicationWindow {
                                 console.error("Invalid latitude or longitude");
                             }
                         }
+
                     }
 
                     ToolTip {
@@ -395,10 +570,11 @@ ApplicationWindow {
                             console.log("Ship MMSI:", shipDetails.mmsi);
                             shipData.printShipDetails(shipUuid);
                             infoPanel.currentShip = shipDetails;
+                            infoPanel.currentShipUuid = shipUuid
                             infoPanel.visible = true; // Open the drawer when a ship is clicked
 
                             // Fetch track history
-                            pastTrail.fetchTrackHistory(shipUuid, 48);
+                            //pastTrail.fetchTrackHistory(shipUuid, 48);
                         }
 
                         onExited: {
@@ -826,6 +1002,8 @@ ApplicationWindow {
         shipData.fetchShips()
         shipDataModel.fetchShipData()
         bottomBar.updateCoordinates(mapview.center.latitude, mapview.center.longitude)
+
+        console.log("Main QML completed. pastHistory is null:", pastHistory === null)
     }
 
     function formatDMS(coordinate, isLatitude) {
@@ -876,4 +1054,3 @@ ApplicationWindow {
     }
 
 }
-
