@@ -46,6 +46,9 @@ void ShipDataModel::fetchShipData()
             qDebug() << "Error fetching ship data:" << reply->errorString();
         }
 
+        // Add this debug statement
+        qDebug() << "*** Sample ship data:" << m_shipData[m_shipOrder.first()];
+
         reply->deleteLater();
         sender()->deleteLater();
     });
@@ -66,12 +69,21 @@ void ShipDataModel::setCurrentPage(int page)
     }
 }
 
+// void ShipDataModel::setItemsPerPage(int items)
+// {
+//     if (m_itemsPerPage != items) {
+//         m_itemsPerPage = items;
+//         emit itemsPerPageChanged();
+//         updatePage();
+//     }
+// }
+
 void ShipDataModel::setItemsPerPage(int items)
 {
     if (m_itemsPerPage != items) {
         m_itemsPerPage = items;
+        m_tableModel->setPage(m_currentPage, m_itemsPerPage);
         emit itemsPerPageChanged();
-        updatePage();
     }
 }
 

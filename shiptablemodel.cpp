@@ -11,10 +11,13 @@ int ShipTableModel::rowCount(const QModelIndex &parent) const
         return 0;
     
     int totalRows = m_shipOrder.size();
-    int startIndex = (m_currentPage - 1) * m_itemsPerPage;
+    int startIndex = (m_currentPage-1 ) * m_itemsPerPage;
     
     return qMin(m_itemsPerPage, totalRows - startIndex);
 }
+
+
+
 
 int ShipTableModel::columnCount(const QModelIndex &parent) const
 {
@@ -25,7 +28,7 @@ int ShipTableModel::columnCount(const QModelIndex &parent) const
 
 QVariant ShipTableModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid() || role != Qt::DisplayRole)
         return QVariant();
 
     int row = index.row();
@@ -38,9 +41,21 @@ QVariant ShipTableModel::data(const QModelIndex &index, int role) const
     if (col < m_headers.size()) {
         QString uuid = m_shipOrder[actualIndex];
         QString key = m_headers[col];
+        //qDebug() << "Accessing data for key:" << key << "uuid:" << uuid;
+        if (key == "latitude" || key == "longitude") {
+            QJsonValue value = m_shipData[uuid][key];
+            if (value.isDouble()) {
+                double doubleValue = value.toDouble();
+                QString dmsValue = decimalToDMS(doubleValue, key == "latitude");
+                qDebug() << "Converting" << key << doubleValue << "to DMS:" << dmsValue;
+                return dmsValue;
+            } else {
+                qDebug() << "Failed to convert" << key << "to double. Value:" << value.toString();
+            }
+        }
         return m_shipData[uuid][key].toVariant();
-    } else if (col == m_headers.size()) {
-        // This is our button column
+    }
+    else if (col == m_headers.size()) {
         return QVariant("Action");
     }
 
@@ -81,7 +96,7 @@ void ShipTableModel::setShipData(const QMap<QString, QJsonObject> &shipData, con
     m_shipOrder = shipOrder;
     if (!m_shipData.isEmpty()) {
         m_headers = m_shipData.first().keys();
-        // Ensure MMSI is the first column
+        // Ensure MMSI is the first column, track_name is the second, and latitude/longitude are third and fourth
         m_headers.removeAll("mmsi");
         m_headers.removeAll("track_name");
         m_headers.removeAll("latitude");
@@ -91,6 +106,7 @@ void ShipTableModel::setShipData(const QMap<QString, QJsonObject> &shipData, con
         m_headers.prepend("track_name");
         m_headers.prepend("mmsi");
     }
+    qDebug() << "Headers set to:" << m_headers;
     endResetModel();
 }
 

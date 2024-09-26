@@ -29,6 +29,7 @@ private:
     QVector<QString> m_headers;
     int m_currentPage = 1;
     int m_itemsPerPage = 10;
+    static QString decimalToDMS(double decimal, bool isLatitude);
 };
 
 #endif // SHIPTABLEMODEL_H
