@@ -34,9 +34,13 @@ public:
     void setPage(int page, int itemsPerPage);
     void fetchMessageTypes();
     QString getMessageTypeDescription(int messageTypeId) const;
+    QString getTrackNavStatus(int statusId) const;
+    void fetchTrackNavStatuses();
+
 
 signals:
     void messageTypesLoaded();
+    void trackNavStatusesLoaded();
 
 private slots:
     void onNetworkReply(QNetworkReply *reply);
@@ -54,6 +58,7 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QMap<int, QVariantMap> m_messageTypeMap;
+    QMap<int, QString> m_trackNavStatusMap;
 };
 
 #endif // SHIPTABLEMODEL_H

@@ -372,7 +372,7 @@ ApplicationWindow {
         }
         Shortcut {
             enabled: mapview.zoomLevel < mapview.maximumZoomLevel
-            sequence: StandardKey.ZoomIn
+
             onActivated: mapview.zoomLevel = Math.round(mapview.zoomLevel + 1)
         }
         Shortcut {
@@ -479,6 +479,7 @@ ApplicationWindow {
                                     source: "qrc:/cargo.svg"
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
+                                    rotation: shipDetails.course_over_ground - 90 || 0
                                 }
 
                     MouseArea {
@@ -1075,6 +1076,14 @@ ApplicationWindow {
 
         // Add this property
             property real currentDisplacement: 0
+
+        anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+            z: 1 // Ensure it's above the map
+
 
             // Modify the updateDisplacement function
             function updateDisplacement(displacement) {

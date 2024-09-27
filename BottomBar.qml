@@ -6,6 +6,7 @@ Rectangle {
     id: bottomBar
     width: parent.width
     height: 50
+    z:10
     color: "#282c34"
     anchors.bottom: parent.bottom
     anchors.bottomMargin: 20
@@ -23,7 +24,7 @@ Rectangle {
 
     function updateBearing(bearing) {
         bearingText.text = "Bearing: " + bearing + "°"
-    } 
+    }
 
     // Add this property
     property real currentDisplacement: 0
@@ -149,7 +150,7 @@ Rectangle {
             color: "#1E90FF"
             Layout.alignment: Qt.AlignRight
             Layout.preferredWidth: 120
-        } 
+        }
 
         Text {
                     id: displacementText
@@ -160,7 +161,7 @@ Rectangle {
                     Layout.alignment: Qt.AlignRight
                     Layout.preferredWidth: 150
                 }
-        
+
     }
 
     function formatDMS(coordinate, isLatitude) {
