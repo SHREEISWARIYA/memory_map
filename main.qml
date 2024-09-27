@@ -587,7 +587,6 @@ ApplicationWindow {
         }
 
 
-
         // Add this MapQuickItem for the marker
         MapQuickItem {
             id: markerItem
@@ -708,10 +707,7 @@ ApplicationWindow {
         // }
 
 
-
         Button {
-            width: 33
-            height: 33
             background: Rectangle {
                 color: "#555"  // Background color
                 radius: 8  // Rounded corners
@@ -825,9 +821,48 @@ ApplicationWindow {
             width: 33
             height: 33
             background: Rectangle {
-                color: "#555"  // Background color
-                radius: 8  // Rounded corners
-                border.color: "#666"  // Subtle border
+                color: "#555" // Background color
+                radius: 8 // Rounded corners
+                border.color: "#666" // Subtle border
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/map.png"
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+            }
+            onClicked: {
+                mapDialog.open()
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    mapDialog.open()
+                }
+                onPressedChanged: {
+                    if (pressed) {
+                        parent.background.color = "#444" // Darker on press
+                    } else {
+                        parent.background.color = "#555" // Original color
+                    }
+                }
+            }
+        }
+        MapDialog {
+            id: mapDialog
+            x: window.width - width - 10
+            y: 0
+            width: 500 // Adjust the width as needed
+            height: parent.height
+        }
+
+        Button {
+            width: 33
+            height: 33
+            background: Rectangle {
+                color: "#555" // Background color
+                radius: 8 // Rounded corners
+                border.color: "#666" // Subtle border
                 border.width: 1
             }
             contentItem: Image {

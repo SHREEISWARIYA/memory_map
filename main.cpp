@@ -7,6 +7,10 @@
 #include "pastTrail.h"
 #include "pasthistory.h"
 //#include "messagetype.h"
+#include "ShapefileManager.h"
+#include "UserSettings.h"
+#include "backgroundprocessor.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +29,14 @@ int main(int argc, char *argv[])
     //PastTrack pastTrack;
     PastTrail pastTrail;
     PastHistory pastHistory;
+    UserSettings userSettings;
+    BackgroundProcessor backgroundProcessor;
+
+    // Connect the mapPathsUpdated signal to startProcessing slot
+    QObject::connect(&userSettings, &UserSettings::mapPathsUpdated,
+                     [&backgroundProcessor, &userSettings]() {
+                         backgroundProcessor.startProcessing(&userSettings);
+                     });
 
     //ShipTableModel *shipTableModel = new ShipTableModel();
     //MessageType *messageType = new MessageType();
@@ -40,7 +52,12 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("pastTrail", &pastTrail);
     engine.rootContext()->setContextProperty("pastHistory", &pastHistory);
     //engine.rootContext()->setContextProperty("messageType", messageType);
+    
+    engine.rootContext()->setContextProperty("userSettings", &userSettings);
+    engine.rootContext()->setContextProperty("backgroundProcessor", &backgroundProcessor);
 
+    // Initial start of processing
+    backgroundProcessor.startProcessing(&userSettings);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(
