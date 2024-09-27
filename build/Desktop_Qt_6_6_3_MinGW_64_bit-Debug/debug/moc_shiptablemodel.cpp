@@ -42,6 +42,7 @@ constexpr auto qt_meta_stringdata_CLASSShipTableModelENDCLASS = QtMocHelpers::st
     "ShipTableModel",
     "messageTypesLoaded",
     "",
+    "trackNavStatusesLoaded",
     "onNetworkReply",
     "QNetworkReply*",
     "reply",
@@ -50,15 +51,16 @@ constexpr auto qt_meta_stringdata_CLASSShipTableModelENDCLASS = QtMocHelpers::st
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSShipTableModelENDCLASS_t {
-    uint offsetsAndSizes[16];
+    uint offsetsAndSizes[18];
     char stringdata0[15];
     char stringdata1[19];
     char stringdata2[1];
-    char stringdata3[15];
+    char stringdata3[23];
     char stringdata4[15];
-    char stringdata5[6];
-    char stringdata6[18];
-    char stringdata7[4];
+    char stringdata5[15];
+    char stringdata6[6];
+    char stringdata7[18];
+    char stringdata8[4];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSShipTableModelENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -67,15 +69,17 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSShipTableModelENDCLASS_t qt_met
         QT_MOC_LITERAL(0, 14),  // "ShipTableModel"
         QT_MOC_LITERAL(15, 18),  // "messageTypesLoaded"
         QT_MOC_LITERAL(34, 0),  // ""
-        QT_MOC_LITERAL(35, 14),  // "onNetworkReply"
-        QT_MOC_LITERAL(50, 14),  // "QNetworkReply*"
-        QT_MOC_LITERAL(65, 5),  // "reply"
-        QT_MOC_LITERAL(71, 17),  // "getShipDataForRow"
-        QT_MOC_LITERAL(89, 3)   // "row"
+        QT_MOC_LITERAL(35, 22),  // "trackNavStatusesLoaded"
+        QT_MOC_LITERAL(58, 14),  // "onNetworkReply"
+        QT_MOC_LITERAL(73, 14),  // "QNetworkReply*"
+        QT_MOC_LITERAL(88, 5),  // "reply"
+        QT_MOC_LITERAL(94, 17),  // "getShipDataForRow"
+        QT_MOC_LITERAL(112, 3)   // "row"
     },
     "ShipTableModel",
     "messageTypesLoaded",
     "",
+    "trackNavStatusesLoaded",
     "onNetworkReply",
     "QNetworkReply*",
     "reply",
@@ -92,30 +96,32 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSShipTableModelENDCLASS[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       1,       // signalCount
+       2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   32,    2, 0x06,    1 /* Public */,
+       1,    0,   38,    2, 0x06,    1 /* Public */,
+       3,    0,   39,    2, 0x06,    2 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       3,    1,   33,    2, 0x08,    2 /* Private */,
+       4,    1,   40,    2, 0x08,    3 /* Private */,
 
  // methods: name, argc, parameters, tag, flags, initial metatype offsets
-       6,    1,   36,    2, 0x102,    4 /* Public | MethodIsConst  */,
+       7,    1,   43,    2, 0x102,    5 /* Public | MethodIsConst  */,
 
  // signals: parameters
     QMetaType::Void,
+    QMetaType::Void,
 
  // slots: parameters
-    QMetaType::Void, 0x80000000 | 4,    5,
+    QMetaType::Void, 0x80000000 | 5,    6,
 
  // methods: parameters
-    QMetaType::QJsonObject, QMetaType::Int,    7,
+    QMetaType::QJsonObject, QMetaType::Int,    8,
 
        0        // eod
 };
@@ -130,6 +136,8 @@ Q_CONSTINIT const QMetaObject ShipTableModel::staticMetaObject = { {
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<ShipTableModel, std::true_type>,
         // method 'messageTypesLoaded'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'trackNavStatusesLoaded'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'onNetworkReply'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
@@ -148,15 +156,16 @@ void ShipTableModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         (void)_t;
         switch (_id) {
         case 0: _t->messageTypesLoaded(); break;
-        case 1: _t->onNetworkReply((*reinterpret_cast< std::add_pointer_t<QNetworkReply*>>(_a[1]))); break;
-        case 2: { QJsonObject _r = _t->getShipDataForRow((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])));
+        case 1: _t->trackNavStatusesLoaded(); break;
+        case 2: _t->onNetworkReply((*reinterpret_cast< std::add_pointer_t<QNetworkReply*>>(_a[1]))); break;
+        case 3: { QJsonObject _r = _t->getShipDataForRow((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])));
             if (_a[0]) *reinterpret_cast< QJsonObject*>(_a[0]) = std::move(_r); }  break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         switch (_id) {
         default: *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType(); break;
-        case 1:
+        case 2:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType(); break;
             case 0:
@@ -170,6 +179,13 @@ void ShipTableModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             using _t = void (ShipTableModel::*)();
             if (_t _q_method = &ShipTableModel::messageTypesLoaded; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
                 *result = 0;
+                return;
+            }
+        }
+        {
+            using _t = void (ShipTableModel::*)();
+            if (_t _q_method = &ShipTableModel::trackNavStatusesLoaded; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
+                *result = 1;
                 return;
             }
         }
@@ -195,13 +211,13 @@ int ShipTableModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }
@@ -210,5 +226,11 @@ int ShipTableModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 void ShipTableModel::messageTypesLoaded()
 {
     QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+}
+
+// SIGNAL 1
+void ShipTableModel::trackNavStatusesLoaded()
+{
+    QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
 }
 QT_WARNING_POP

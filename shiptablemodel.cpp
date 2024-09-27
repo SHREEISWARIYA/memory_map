@@ -2,6 +2,11 @@
 
 #include <QDateTime>
 #include <QTimeZone>
+#include <QJsonObject>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 ShipTableModel::ShipTableModel(QObject *parent)
     : QAbstractTableModel(parent)
@@ -10,11 +15,18 @@ ShipTableModel::ShipTableModel(QObject *parent)
     connect(m_networkManager, &QNetworkAccessManager::finished, this, &ShipTableModel::onNetworkReply);
 
     fetchMessageTypes();
+    fetchTrackNavStatuses();
 }
 
 void ShipTableModel::fetchMessageTypes()
 {
     QNetworkRequest request(QUrl("http://localhost:3000/api/ships/Message-Types"));
+    m_networkManager->get(request);
+}
+
+void ShipTableModel::fetchTrackNavStatuses()
+{
+    QNetworkRequest request(QUrl("http://localhost:3000/api/ships/TrackNavStatuses"));
     m_networkManager->get(request);
 }
 
@@ -25,34 +37,56 @@ void ShipTableModel::onNetworkReply(QNetworkReply *reply)
         QJsonDocument jsonDoc = QJsonDocument::fromJson(response);
         QJsonArray jsonArray = jsonDoc.array();
 
-        for (const QJsonValue &value : jsonArray) {
-            QJsonObject obj = value.toObject();
-            int id = obj["id"].toInt();
+        if (reply->url().toString().contains("Message-Types")) {
+            for (const QJsonValue &value : jsonArray) {
+                QJsonObject obj = value.toObject();
+                int id = obj["id"].toInt();
 
-            QVariantMap messageData;
-            messageData["source_type"] = obj["source_type"].toString();
-            messageData["source_sub_type"] = obj["source_sub_type"].toString();
-            messageData["short_desc"] = obj["short_desc"].toString();
-            messageData["description"] = obj["description"].toString();
+                QVariantMap messageData;
+                messageData["source_type"] = obj["source_type"].toString();
+                messageData["source_sub_type"] = obj["source_sub_type"].toString();
+                messageData["short_desc"] = obj["short_desc"].toString();
+                messageData["description"] = obj["description"].toString();
 
-            m_messageTypeMap[id] = messageData;
+                m_messageTypeMap[id] = messageData;
+            }
+
+            // Print all the data in the console
+            QMapIterator<int, QVariantMap> i(m_messageTypeMap);
+            // while (i.hasNext()) {
+            //     i.next();
+            //     qDebug() << "Message Type ID:" << i.key();
+            //     qDebug() << "  Source Type:" << i.value()["source_type"].toString();
+            //     qDebug() << "  Source Sub Type:" << i.value()["source_sub_type"].toString();
+            //     qDebug() << "  Short Description:" << i.value()["short_desc"].toString();
+            //     qDebug() << "  Description:" << i.value()["description"].toString();
+            //     qDebug() << "";
+            // }
+
+            emit messageTypesLoaded();
         }
+        else if (reply->url().toString().contains("TrackNavStatuses")) {
+            for (const QJsonValue &value : jsonArray) {
+                QJsonObject obj = value.toObject();
+                int id = obj["id"].toInt();
+                QString navStatus = obj["nav_status"].toString();
 
-        // Print all the data in the console
-        QMapIterator<int, QVariantMap> i(m_messageTypeMap);
-        // while (i.hasNext()) {
-        //     i.next();
-        //     qDebug() << "ID:" << i.key();
-        //     qDebug() << "  Source Type:" << i.value()["source_type"].toString();
-        //     qDebug() << "  Source Sub Type:" << i.value()["source_sub_type"].toString();
-        //     qDebug() << "  Short Description:" << i.value()["short_desc"].toString();
-        //     qDebug() << "  Description:" << i.value()["description"].toString();
-        //     qDebug() << "";
-        // }
+                m_trackNavStatusMap[id] = navStatus;
+            }
 
-        emit messageTypesLoaded();
+            // Print all the data in the console
+            QMapIterator<int, QString> i(m_trackNavStatusMap);
+            // while (i.hasNext()) {
+            //     i.next();
+            //     qDebug() << "Track Nav Status ID:" << i.key();
+            //     qDebug() << "  Navigation Status:" << i.value();
+            //     qDebug() << "";
+            // }
+
+            emit trackNavStatusesLoaded();
+        }
     } else {
-        qDebug() << "Error fetching message types:" << reply->errorString();
+        qDebug() << "Error fetching data:" << reply->errorString();
     }
 
     reply->deleteLater();
@@ -66,6 +100,11 @@ QString ShipTableModel::getMessageTypeDescription(int messageTypeId) const
     return QString();
 }
 
+// Add this new function
+QString ShipTableModel::getTrackNavStatus(int statusId) const
+{
+    return m_trackNavStatusMap.value(statusId, "Unknown");
+}
 
 
 int ShipTableModel::rowCount(const QModelIndex &parent) const
@@ -160,6 +199,10 @@ QVariant ShipTableModel::data(const QModelIndex &index, int role) const
             } else {
                 return QString("Unknown (%1)").arg(messageTypeId);
             }
+        }
+        else if (key == "track_nav_status__id") {
+            int statusId = m_shipData[uuid][key].toInt();
+            return getTrackNavStatus(statusId);
         }
         else if (key == "created_at" || key == "sensor_timestamp" || key == "updated_at") {
             return formatTimestamp(m_shipData[uuid][key].toVariant());
