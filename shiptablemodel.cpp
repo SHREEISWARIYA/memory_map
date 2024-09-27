@@ -1,11 +1,72 @@
 #include "ShipTableModel.h"
+
 #include <QDateTime>
 #include <QTimeZone>
 
 ShipTableModel::ShipTableModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
+    m_networkManager = new QNetworkAccessManager(this);
+    connect(m_networkManager, &QNetworkAccessManager::finished, this, &ShipTableModel::onNetworkReply);
+
+    fetchMessageTypes();
 }
+
+void ShipTableModel::fetchMessageTypes()
+{
+    QNetworkRequest request(QUrl("http://localhost:3000/api/ships/Message-Types"));
+    m_networkManager->get(request);
+}
+
+void ShipTableModel::onNetworkReply(QNetworkReply *reply)
+{
+    if (reply->error() == QNetworkReply::NoError) {
+        QByteArray response = reply->readAll();
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(response);
+        QJsonArray jsonArray = jsonDoc.array();
+
+        for (const QJsonValue &value : jsonArray) {
+            QJsonObject obj = value.toObject();
+            int id = obj["id"].toInt();
+
+            QVariantMap messageData;
+            messageData["source_type"] = obj["source_type"].toString();
+            messageData["source_sub_type"] = obj["source_sub_type"].toString();
+            messageData["short_desc"] = obj["short_desc"].toString();
+            messageData["description"] = obj["description"].toString();
+
+            m_messageTypeMap[id] = messageData;
+        }
+
+        // Print all the data in the console
+        QMapIterator<int, QVariantMap> i(m_messageTypeMap);
+        // while (i.hasNext()) {
+        //     i.next();
+        //     qDebug() << "ID:" << i.key();
+        //     qDebug() << "  Source Type:" << i.value()["source_type"].toString();
+        //     qDebug() << "  Source Sub Type:" << i.value()["source_sub_type"].toString();
+        //     qDebug() << "  Short Description:" << i.value()["short_desc"].toString();
+        //     qDebug() << "  Description:" << i.value()["description"].toString();
+        //     qDebug() << "";
+        // }
+
+        emit messageTypesLoaded();
+    } else {
+        qDebug() << "Error fetching message types:" << reply->errorString();
+    }
+
+    reply->deleteLater();
+}
+
+QString ShipTableModel::getMessageTypeDescription(int messageTypeId) const
+{
+    if (m_messageTypeMap.contains(messageTypeId)) {
+        return m_messageTypeMap[messageTypeId]["description"].toString();
+    }
+    return QString();
+}
+
+
 
 int ShipTableModel::rowCount(const QModelIndex &parent) const
 {
@@ -17,8 +78,6 @@ int ShipTableModel::rowCount(const QModelIndex &parent) const
     
     return qMin(m_itemsPerPage, totalRows - startIndex);
 }
-
-
 
 
 int ShipTableModel::columnCount(const QModelIndex &parent) const
@@ -33,6 +92,7 @@ int ShipTableModel::columnCount(const QModelIndex &parent) const
 //     if (!index.isValid() || role != Qt::DisplayRole)
 //         return QVariant();
 
+
 //     int row = index.row();
 //     int col = index.column();
 //     int actualIndex = (m_currentPage - 1) * m_itemsPerPage + row;
@@ -43,17 +103,29 @@ int ShipTableModel::columnCount(const QModelIndex &parent) const
 //     if (col < m_headers.size()) {
 //         QString uuid = m_shipOrder[actualIndex];
 //         QString key = m_headers[col];
-//         //qDebug() << "Accessing data for key:" << key << "uuid:" << uuid;
-//         if (key == "latitude" || key == "longitude") {
+
+//         // if (key == "message_type_id") {
+//         //     int messageTypeId = m_shipData[uuid][key].toInt();
+//         //     if (m_messageType) {
+//         //         return m_messageType->getShortDesc(messageTypeId);
+//         //     }
+//         // }
+
+//         if (key == "created_at" || key == "sensor_timestamp" || key == "updated_at") {
+//             return formatTimestamp(m_shipData[uuid][key].toVariant());
+//         }
+//         else if (key == "latitude" || key == "longitude") {
 //             QJsonValue value = m_shipData[uuid][key];
 //             if (value.isDouble()) {
 //                 double doubleValue = value.toDouble();
 //                 QString dmsValue = decimalToDMS(doubleValue, key == "latitude");
-//                 qDebug() << "Converting" << key << doubleValue << "to DMS:" << dmsValue;
 //                 return dmsValue;
-//             } else {
-//                 qDebug() << "Failed to convert" << key << "to double. Value:" << value.toString();
 //             }
+//         }
+//         else if (key == "speed_over_ground" || key == "rate_of_turn" || key == "true_heading" ||
+//                  key == "height_depth" || key == "message_type_id" || key == "track_nav_status_id") {
+//             // Add any specific formatting for these columns if needed
+//             return m_shipData[uuid][key].toVariant();
 //         }
 //         return m_shipData[uuid][key].toVariant();
 //     }
@@ -63,6 +135,7 @@ int ShipTableModel::columnCount(const QModelIndex &parent) const
 
 //     return QVariant();
 // }
+
 
 QVariant ShipTableModel::data(const QModelIndex &index, int role) const
 {
@@ -80,7 +153,15 @@ QVariant ShipTableModel::data(const QModelIndex &index, int role) const
         QString uuid = m_shipOrder[actualIndex];
         QString key = m_headers[col];
 
-        if (key == "created_at") {
+        if (key == "message_type__id") {
+            int messageTypeId = m_shipData[uuid][key].toInt();
+            if (m_messageTypeMap.contains(messageTypeId)) {
+                return m_messageTypeMap[messageTypeId]["short_desc"].toString();
+            } else {
+                return QString("Unknown (%1)").arg(messageTypeId);
+            }
+        }
+        else if (key == "created_at" || key == "sensor_timestamp" || key == "updated_at") {
             return formatTimestamp(m_shipData[uuid][key].toVariant());
         }
         else if (key == "latitude" || key == "longitude") {
@@ -89,9 +170,12 @@ QVariant ShipTableModel::data(const QModelIndex &index, int role) const
                 double doubleValue = value.toDouble();
                 QString dmsValue = decimalToDMS(doubleValue, key == "latitude");
                 return dmsValue;
-            } else {
-                qDebug() << "Failed to convert" << key << "to double. Value:" << value.toString();
             }
+        }
+        else if (key == "speed_over_ground" || key == "rate_of_turn" || key == "true_heading" ||
+                 key == "height_depth" || key == "track_nav_status__id") {
+            // Add any specific formatting for these columns if needed
+            return m_shipData[uuid][key].toVariant();
         }
         return m_shipData[uuid][key].toVariant();
     }
@@ -101,6 +185,9 @@ QVariant ShipTableModel::data(const QModelIndex &index, int role) const
 
     return QVariant();
 }
+
+
+
 
 QVariant ShipTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
@@ -117,18 +204,7 @@ QVariant ShipTableModel::headerData(int section, Qt::Orientation orientation, in
     return QVariant();
 }
 
-// void ShipTableModel::setShipData(const QMap<QString, QJsonObject> &shipData, const QVector<QString> &shipOrder)
-// {
-//     beginResetModel();
-//     m_shipData = shipData;
-//     m_shipOrder = shipOrder;
-//     if (!m_shipData.isEmpty()) {
-//         m_headers = m_shipData.first().keys().toVector();
-//     }
-//     endResetModel();
-// }
 
-// Modify the setShipData function to set the headers
 void ShipTableModel::setShipData(const QMap<QString, QJsonObject> &shipData, const QVector<QString> &shipOrder)
 {
     beginResetModel();
@@ -136,17 +212,19 @@ void ShipTableModel::setShipData(const QMap<QString, QJsonObject> &shipData, con
     m_shipOrder = shipOrder;
     if (!m_shipData.isEmpty()) {
         m_headers = m_shipData.first().keys();
-        // Ensure MMSI is the first column, track_name is the second, and latitude/longitude are third and fourth
-        m_headers.removeAll("mmsi");
-        m_headers.removeAll("track_name");
-        m_headers.removeAll("latitude");
-        m_headers.removeAll("longitude");
-        m_headers.prepend("longitude");
-        m_headers.prepend("latitude");
-        m_headers.prepend("track_name");
-        m_headers.prepend("mmsi");
+        // Ensure the columns are in the desired order
+        QStringList orderedHeaders = {"mmsi", "track_name", "latitude", "longitude","speed_over_ground",
+                                     "course_over_ground","rate_of_turn", "true_heading", "height_depth",
+                                     "message_type__id", "track_nav_status__id"};
+        for (const QString &header : orderedHeaders) {
+            m_headers.removeAll(header);
+        }
+        // Add the ordered headers at the beginning
+        for (int i = orderedHeaders.size() - 1; i >= 0; --i) {
+            m_headers.prepend(orderedHeaders[i]);
+        }
     }
-    qDebug() << "Headers set to:" << m_headers;
+    //qDebug() << "Headers set to:" << m_headers;
     endResetModel();
 }
 
@@ -207,7 +285,7 @@ QString ShipTableModel::formatTimestamp(const QVariant &timestamp) const
     }
 
     if (!dateTime.isValid()) {
-        qWarning() << "Failed to parse timestamp:" << timestamp;
+        //qWarning() << "Failed to parse timestamp:" << timestamp;
         return timestamp.toString();
     }
 

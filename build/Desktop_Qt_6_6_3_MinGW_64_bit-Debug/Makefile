@@ -393,6 +393,7 @@ Makefile: ../../mem_pagination.pro ../../../../Qt/6.6.3/mingw_64/mkspecs/win32-g
 		../../../../Qt/6.6.3/mingw_64/mkspecs/features/resources.prf \
 		../../../../Qt/6.6.3/mingw_64/mkspecs/features/moc.prf \
 		../../../../Qt/6.6.3/mingw_64/mkspecs/features/win32/opengl.prf \
+		../../../../Qt/6.6.3/mingw_64/mkspecs/features/uic.prf \
 		../../../../Qt/6.6.3/mingw_64/mkspecs/features/qmake_use.prf \
 		../../../../Qt/6.6.3/mingw_64/mkspecs/features/file_copies.prf \
 		../../../../Qt/6.6.3/mingw_64/mkspecs/features/win32/windows.prf \
@@ -403,6 +404,7 @@ Makefile: ../../mem_pagination.pro ../../../../Qt/6.6.3/mingw_64/mkspecs/win32-g
 		../../mem_pagination.pro \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6Quick.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6OpenGL.prl \
+		../../../../Qt/6.6.3/mingw_64/lib/Qt6Widgets.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6Gui.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6QmlModels.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6Qml.prl \
@@ -735,6 +737,7 @@ Makefile: ../../mem_pagination.pro ../../../../Qt/6.6.3/mingw_64/mkspecs/win32-g
 ../../../../Qt/6.6.3/mingw_64/mkspecs/features/resources.prf:
 ../../../../Qt/6.6.3/mingw_64/mkspecs/features/moc.prf:
 ../../../../Qt/6.6.3/mingw_64/mkspecs/features/win32/opengl.prf:
+../../../../Qt/6.6.3/mingw_64/mkspecs/features/uic.prf:
 ../../../../Qt/6.6.3/mingw_64/mkspecs/features/qmake_use.prf:
 ../../../../Qt/6.6.3/mingw_64/mkspecs/features/file_copies.prf:
 ../../../../Qt/6.6.3/mingw_64/mkspecs/features/win32/windows.prf:
@@ -745,6 +748,7 @@ Makefile: ../../mem_pagination.pro ../../../../Qt/6.6.3/mingw_64/mkspecs/win32-g
 ../../mem_pagination.pro:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6Quick.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6OpenGL.prl:
+../../../../Qt/6.6.3/mingw_64/lib/Qt6Widgets.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6Gui.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6QmlModels.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6Qml.prl:

@@ -1,4 +1,4 @@
-QT += quick
+QT += quick widgets
 QTPLUGIN += qml_QtGraphicalEffects
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -8,6 +8,7 @@ QTPLUGIN += qml_QtGraphicalEffects
 SOURCES += \
         cursorcontroller.cpp \
         main.cpp \
+        messagetype.cpp \
         pasthistory.cpp \
         pasttrail.cpp \
         shipdata.cpp \
@@ -29,6 +30,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     cursorcontroller.h \
+    messagetype.h \
     pasthistory.h \
     pasttrail.h \
     shipdata.h \

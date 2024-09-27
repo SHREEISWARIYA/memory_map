@@ -47,7 +47,7 @@ void ShipDataModel::fetchShipData()
         }
 
         // Add this debug statement
-        qDebug() << "*** Sample ship data:" << m_shipData[m_shipOrder.first()];
+       // qDebug() << "*** Sample ship data:" << m_shipData[m_shipOrder.first()];
 
         reply->deleteLater();
         sender()->deleteLater();

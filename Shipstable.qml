@@ -150,4 +150,12 @@ Drawer {
             }
         }
     }
-}
+
+    Connections {
+        target: shipDataModel
+        function onMessageTypesLoaded() {
+            console.log("Message types loaded")
+            tableView.forceLayout()
+        }
+    }
+} //Drawer ends

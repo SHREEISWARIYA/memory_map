@@ -5,6 +5,16 @@
 #include <QVector>
 #include <QMap>
 #include <QJsonObject>
+// Add these new includes
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+// Add these new includes
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+
+// // Forward declaration of MessageType
+// class MessageType;
 
 class ShipTableModel : public QAbstractTableModel
 {
@@ -22,6 +32,16 @@ public:
 
     void setShipData(const QMap<QString, QJsonObject> &shipData, const QVector<QString> &shipOrder);
     void setPage(int page, int itemsPerPage);
+    void fetchMessageTypes();
+    QString getMessageTypeDescription(int messageTypeId) const;
+
+signals:
+    void messageTypesLoaded();
+
+private slots:
+    void onNetworkReply(QNetworkReply *reply);
+
+
 
 private:
     QMap<QString, QJsonObject> m_shipData;
@@ -31,6 +51,9 @@ private:
     int m_itemsPerPage = 10;
     static QString decimalToDMS(double decimal, bool isLatitude);
     QString formatTimestamp(const QVariant &timestamp) const;
+
+    QNetworkAccessManager *m_networkManager;
+    QMap<int, QVariantMap> m_messageTypeMap;
 };
 
 #endif // SHIPTABLEMODEL_H

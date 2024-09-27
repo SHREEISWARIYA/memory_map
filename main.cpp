@@ -1,19 +1,19 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "shipdata.h"
 #include "shipdatamodel.h"
 #include "cursorcontroller.h"
-//#include "pastTrack.h"
 #include "pastTrail.h"
 #include "pasthistory.h"
+//#include "messagetype.h"
 
 int main(int argc, char *argv[])
 {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
 
@@ -26,7 +26,12 @@ int main(int argc, char *argv[])
     PastTrail pastTrail;
     PastHistory pastHistory;
 
-    //qmlRegisterType<PastTrail>("com.pastTrail", 1, 0, "PastTrail");
+    //ShipTableModel *shipTableModel = new ShipTableModel();
+    //MessageType *messageType = new MessageType();
+    //shipTableModel->setMessageType(messageType);
+
+
+
 
     engine.rootContext()->setContextProperty("shipData", &shipData);
     engine.rootContext()->setContextProperty("shipDataModel", &shipDataModel);
@@ -34,6 +39,7 @@ int main(int argc, char *argv[])
     //engine.rootContext()->setContextProperty("pastTrack", &pastTrack);
     engine.rootContext()->setContextProperty("pastTrail", &pastTrail);
     engine.rootContext()->setContextProperty("pastHistory", &pastHistory);
+    //engine.rootContext()->setContextProperty("messageType", messageType);
 
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));

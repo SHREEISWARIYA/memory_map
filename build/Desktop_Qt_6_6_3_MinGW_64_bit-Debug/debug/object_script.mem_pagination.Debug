@@ -1,5 +1,6 @@
 debug/cursorcontroller.o
 debug/main.o
+debug/messagetype.o
 debug/pasthistory.o
 debug/pasttrail.o
 debug/shipdata.o
@@ -7,6 +8,7 @@ debug/shipdatamodel.o
 debug/shiptablemodel.o
 debug/qrc_qml.o
 debug/moc_cursorcontroller.o
+debug/moc_messagetype.o
 debug/moc_pasthistory.o
 debug/moc_pasttrail.o
 debug/moc_shipdata.o
