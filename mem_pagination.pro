@@ -1,4 +1,4 @@
-QT += quick widgets
+QT += quick  concurrent widgets
 QTPLUGIN += qml_QtGraphicalEffects
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -6,6 +6,8 @@ QTPLUGIN += qml_QtGraphicalEffects
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        BackgroundProcessor.cpp \
+        UserSettings.cpp \
         cursorcontroller.cpp \
         main.cpp \
         messagetype.cpp \
@@ -13,7 +15,9 @@ SOURCES += \
         pasttrail.cpp \
         shipdata.cpp \
         shipdatamodel.cpp \
-        shiptablemodel.cpp
+        shiptablemodel.cpp \
+        EncConvertor.cpp \
+        ShapefileManager.cpp
 
 RESOURCES += qml.qrc
 
@@ -29,10 +33,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    BackgroundProcessor.h \
+    UserSettings.h \
     cursorcontroller.h \
     messagetype.h \
     pasthistory.h \
     pasttrail.h \
     shipdata.h \
     shipdatamodel.h \
-    shiptablemodel.h
+    shiptablemodel.h \
+    EncConvertor.h \
+    ShapefileManager.h

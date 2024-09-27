@@ -23,3 +23,32 @@
         <file>cargo.svg</file>
     </qresource>
 </RCC>
+
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>RightDock.qml</file>
+        <file>close.png</file>
+        <file>next_button.png</file>
+        <file>previous_button.png</file>
+        <file>ship.png</file>
+        <file>ship-2.png</file>
+        <file>trackList.png</file>
+        <file>Pagination.qml</file>
+        <file>PaginationControl.qml</file>
+        <file>BottomBar.qml</file>
+        <file>marker.png</file>
+        <file>ship-3.png</file>
+        <file>changetheme.png</file>
+        <file>hamberger.png</file>
+        <file>help.png</file>
+        <file>pencil.png</file>
+        <file>route.png</file>
+        <file>settings.png</file>
+        <file>Shipstable.qml</file>
+        <file>map.png</file>
+        <file>MapDialog.qml</file>
+        <file>color_mst.csv</file>
+        <file>cargo.svg</file>
+    </qresource>
+</RCC>
