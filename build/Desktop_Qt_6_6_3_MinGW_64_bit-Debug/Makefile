@@ -409,6 +409,7 @@ Makefile: ../../mem_pagination.pro ../../../../Qt/6.6.3/mingw_64/mkspecs/win32-g
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6QmlModels.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6Qml.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6Network.prl \
+		../../../../Qt/6.6.3/mingw_64/lib/Qt6Concurrent.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6Core.prl \
 		../../../../Qt/6.6.3/mingw_64/lib/Qt6EntryPoint.prl \
 		../../../../Qt/6.6.3/mingw_64/mkspecs/features/build_pass.prf \
@@ -753,6 +754,7 @@ Makefile: ../../mem_pagination.pro ../../../../Qt/6.6.3/mingw_64/mkspecs/win32-g
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6QmlModels.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6Qml.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6Network.prl:
+../../../../Qt/6.6.3/mingw_64/lib/Qt6Concurrent.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6Core.prl:
 ../../../../Qt/6.6.3/mingw_64/lib/Qt6EntryPoint.prl:
 ../../../../Qt/6.6.3/mingw_64/mkspecs/features/build_pass.prf:

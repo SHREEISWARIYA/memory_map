@@ -10,6 +10,7 @@
 #include "ShapefileManager.h"
 #include "UserSettings.h"
 #include "backgroundprocessor.h"
+#include "shiptablemodel.h"
 
 
 int main(int argc, char *argv[])
@@ -31,6 +32,8 @@ int main(int argc, char *argv[])
     PastHistory pastHistory;
     UserSettings userSettings;
     BackgroundProcessor backgroundProcessor;
+    ShipTableModel shipTableModel;
+
 
     // Connect the mapPathsUpdated signal to startProcessing slot
     QObject::connect(&userSettings, &UserSettings::mapPathsUpdated,
@@ -48,13 +51,14 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("shipData", &shipData);
     engine.rootContext()->setContextProperty("shipDataModel", &shipDataModel);
     engine.rootContext()->setContextProperty("cursorController", &cursorController);
-    //engine.rootContext()->setContextProperty("pastTrack", &pastTrack);
     engine.rootContext()->setContextProperty("pastTrail", &pastTrail);
     engine.rootContext()->setContextProperty("pastHistory", &pastHistory);
     //engine.rootContext()->setContextProperty("messageType", messageType);
-    
     engine.rootContext()->setContextProperty("userSettings", &userSettings);
     engine.rootContext()->setContextProperty("backgroundProcessor", &backgroundProcessor);
+    engine.rootContext()->setContextProperty("shipTableModel", &shipTableModel);
+
+    //engine.rootContext()->setContextProperty("infoPanel", infoPanel);
 
     // Initial start of processing
     backgroundProcessor.startProcessing(&userSettings);

@@ -24,5 +24,7 @@
         <file>MapDialog.qml</file>
         <file>color_mst.csv</file>
         <file>cargo.svg</file>
+        <file>cargo_med.svg</file>
+        <file>shipImg.jpg</file>
     </qresource>
 </RCC>

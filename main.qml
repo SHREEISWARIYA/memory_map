@@ -330,6 +330,11 @@ ApplicationWindow {
         anchors.fill: parent
         plugin: Plugin {
             name: "osm"
+            // PluginParameter{
+            //     name : "osm.mapping.custom.host"
+            //     value:"http://192.168.1.8:2080/tiles/"
+            // }
+
             PluginParameter { name: "osm.mapping.providersrepository.disabled"; value: false }
         }
 
@@ -467,16 +472,18 @@ ApplicationWindow {
 
                                 function getSizeForZoomLevel(zoomLevel) {
                                     // Define sizes for specific zoom levels
-                                    if (zoomLevel <= 5) return 10
-                                    if (zoomLevel <= 10) return 20
-                                    if (zoomLevel <= 15) return 30
-                                    if (zoomLevel <= 20) return 40
-                                    return 50  // For zoom levels > 20
+                                     if (zoomLevel <= 3) return 15
+                                    if (zoomLevel <= 5) return 16
+                                    if (zoomLevel <= 6) return 25
+                                    if (zoomLevel <= 7) return 30
+                                    if (zoomLevel <= 8) return 35
+                                    if (zoomLevel <= 10) return 43
+                                    return 70  // For zoom levels > 20
                                 }
 
                                 Image {
                                     id: image
-                                    source: "qrc:/cargo.svg"
+                                    source: "qrc:/cargo_med.svg"
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
                                     rotation: shipDetails.course_over_ground - 90 || 0
@@ -552,10 +559,10 @@ ApplicationWindow {
                         hoverEnabled: true
 
                         property string shipUuid: modelData.uuid
-
+                        property var shipDetails: []
                         // Update hover information on mouse enter
                         onEntered: {
-                            let shipDetails = shipData.getShipDetails(shipUuid);
+                            shipDetails = shipData.getShipDetails(shipUuid);
                             mmsiText.text = "MMSI: " + shipDetails.mmsi;
                             vesselNameText.text = "Vessel Name: " + shipDetails.track_name;
                             latitudeText.text = "Latitude: " + shipDetails.latitude.toFixed(4);
@@ -565,17 +572,43 @@ ApplicationWindow {
                             hoverToolTip.y = mouse.y; // Position it at the mouse cursor
                         }
 
-                        onClicked: {
-                            let shipDetails = shipData.getShipDetails(shipUuid);
-                            console.log("Clicked ship UUID:", shipUuid);
-                            console.log("Ship MMSI:", shipDetails.mmsi);
-                            shipData.printShipDetails(shipUuid);
-                            infoPanel.currentShip = shipDetails;
-                            infoPanel.currentShipUuid = shipUuid
-                            infoPanel.visible = true; // Open the drawer when a ship is clicked
+                        // onClicked: {
+                        //     let shipDetails = shipData.getShipDetails(shipUuid);
+                        //     console.log("Clicked ship UUID:", shipUuid);
+                        //     console.log("Ship MMSI:", shipDetails.mmsi);
+                        //     shipData.printShipDetails(shipUuid);
+                        //     infoPanel.currentShip = shipDetails;
+                        //     infoPanel.currentShipUuid = shipUuid
+                        //     infoPanel.visible = true; // Open the drawer when a ship is clicked
 
-                            // Fetch track history
-                            //pastTrail.fetchTrackHistory(shipUuid, 48);
+                        //     // Fetch track history
+                        //     //pastTrail.fetchTrackHistory(shipUuid, 48);
+                        // }
+
+                        onClicked: {
+                            let mmsi = shipDetails.mmsi;
+                            console.log("Clicked ship MMSI:", mmsi);
+
+                            let uuid = shipData.getUuidFromMmsi(mmsi);
+                            if (uuid) {
+                                console.log("Retrieved UUID:", uuid);
+
+                                let confirmedDetails = shipData.getShipDetails(uuid);
+                                if (Object.keys(confirmedDetails).length > 0) {
+                                    console.log("Ship details retrieved successfully");
+                                    shipData.printShipDetails(uuid);
+                                    infoPanel.currentShip = confirmedDetails;
+                                    infoPanel.currentShipUuid = uuid;
+                                    infoPanel.visible = true; // Open the drawer when a ship is clicked
+
+                                    // Fetch track history
+                                    // pastTrail.fetchTrackHistory(uuid, 48);
+                                } else {
+                                    console.log("No ship details found for UUID:", uuid);
+                                }
+                            } else {
+                                console.log("No UUID found for MMSI:", mmsi);
+                            }
                         }
 
                         onExited: {
@@ -688,6 +721,84 @@ ApplicationWindow {
 
     } //map ends
 
+    // Zoom Buttons ======================================================================================
+
+        ColumnLayout{
+            // id:zoomButtons
+            // x: mainrectangle.width - width - 10
+            // y: mainrectangle.height - height - 20
+            // spacing:5
+            // width: 30
+            // z: mapview.z + 1
+
+            id: zoomButtons
+                anchors {
+                    right: parent.right
+                    bottom: bottomBar.top
+                    margins: 10
+                }
+                spacing: 5
+                width: 30
+                z: mapview.z + 1  // Ensure it's above the map
+
+            Button{
+                id:zoomPlus
+                text:qsTr("+")
+                Layout.fillWidth : true
+                background: Rectangle {
+                    color: "gray"
+                    //implicitWidth: 100
+                    //implicitHeight: 40
+                }
+                contentItem: Text {
+                    text: zoomPlus.text
+                    font: zoomPlus.font
+                    color: "white"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked:{
+                    mapview.zoomLevel += 1
+                }
+            }
+
+            Button{
+                id:zoomLevelVal
+                text: parseInt(mapview.zoomLevel)
+                enabled: false
+                Layout.fillWidth : true
+                background: Rectangle {
+                    color: "gray"
+                }
+                contentItem: Text {
+                    text: zoomLevelVal.text
+                    font: zoomLevelVal.font
+                    color: "white"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            Button{
+                id:zoonMinus
+                text:qsTr("-")
+                Layout.fillWidth : true
+                background: Rectangle {
+                    color: "gray"
+                }
+                contentItem: Text {
+                    text: zoonMinus.text
+                    font: zoonMinus.font
+                    color: "white"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked:{
+                    mapview.zoomLevel -= 1
+                }
+            }
+        }
+
     //SIDEBAR =============================================================================================================================================================================
     Column {
         spacing: 10
@@ -708,6 +819,8 @@ ApplicationWindow {
 
 
         Button {
+            width: 33
+            height: 33
             background: Rectangle {
                 color: "#555"  // Background color
                 radius: 8  // Rounded corners

@@ -26,6 +26,9 @@ public:
     Q_INVOKABLE QVariantMap getShipDetails(const QString &uuid) const;
     Q_INVOKABLE void printShipDetails(const QString &uuid) const;
 
+    // Add this to the public section of the ShipData class
+    QVariantMap getShipDetailsByMmsi(const QString &mmsi) const;
+
 signals:
     void totalShipsChanged();
     void shipsChanged();

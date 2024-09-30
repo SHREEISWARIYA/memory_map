@@ -338,3 +338,8 @@ QString ShipTableModel::formatTimestamp(const QVariant &timestamp) const
     // Format the date and time in a single line
     return dateTime.toString("dd MMM yyyy hh:mm:ss");
 }
+
+// QString ShipTableModel::getTrackNavStatus(int statusId) const
+// {
+//     return m_trackNavStatusMap.value(statusId, "Unknown");
+// }

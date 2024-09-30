@@ -1,4 +1,4 @@
-QT += quick  concurrent widgets
+QT += quick concurrent widgets
 QTPLUGIN += qml_QtGraphicalEffects
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -31,6 +31,9 @@ QML_DESIGNER_IMPORT_PATH =
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+INCLUDEPATH += C:/OSGeo4W/include
+LIBS += -LC:\OSGeo4W\lib -lgdal_i
 
 HEADERS += \
     BackgroundProcessor.h \

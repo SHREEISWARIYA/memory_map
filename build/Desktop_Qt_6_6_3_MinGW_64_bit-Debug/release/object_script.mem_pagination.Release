@@ -1,3 +1,5 @@
+release/BackgroundProcessor.o
+release/UserSettings.o
 release/cursorcontroller.o
 release/main.o
 release/messagetype.o
@@ -6,7 +8,11 @@ release/pasttrail.o
 release/shipdata.o
 release/shipdatamodel.o
 release/shiptablemodel.o
+release/EncConvertor.o
+release/ShapefileManager.o
 release/qrc_qml.o
+release/moc_BackgroundProcessor.o
+release/moc_UserSettings.o
 release/moc_cursorcontroller.o
 release/moc_messagetype.o
 release/moc_pasthistory.o
@@ -14,3 +20,4 @@ release/moc_pasttrail.o
 release/moc_shipdata.o
 release/moc_shipdatamodel.o
 release/moc_shiptablemodel.o
+release/moc_ShapefileManager.o

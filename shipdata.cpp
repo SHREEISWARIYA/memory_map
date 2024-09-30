@@ -151,6 +151,17 @@ void ShipData::printShipDetails(const QString &uuid) const
     }
 }
 
+////////////////////////////////////////////
+
+QVariantMap ShipData::getShipDetailsByMmsi(const QString &mmsi) const
+{
+    QString uuid = getUuidFromMmsi(mmsi);
+    if (!uuid.isEmpty()) {
+        return getShipDetails(uuid);
+    }
+    return QVariantMap(); // Return an empty map if no matching ship is found
+}
+
 
 
 

@@ -1,3 +1,5 @@
+debug/BackgroundProcessor.o
+debug/UserSettings.o
 debug/cursorcontroller.o
 debug/main.o
 debug/messagetype.o
@@ -6,7 +8,11 @@ debug/pasttrail.o
 debug/shipdata.o
 debug/shipdatamodel.o
 debug/shiptablemodel.o
+debug/EncConvertor.o
+debug/ShapefileManager.o
 debug/qrc_qml.o
+debug/moc_BackgroundProcessor.o
+debug/moc_UserSettings.o
 debug/moc_cursorcontroller.o
 debug/moc_messagetype.o
 debug/moc_pasthistory.o
@@ -14,3 +20,4 @@ debug/moc_pasttrail.o
 debug/moc_shipdata.o
 debug/moc_shipdatamodel.o
 debug/moc_shiptablemodel.o
+debug/moc_ShapefileManager.o

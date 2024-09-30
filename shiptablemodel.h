@@ -29,13 +29,15 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     Q_INVOKABLE QJsonObject getShipDataForRow(int row) const;
+    Q_INVOKABLE QString getTrackNavStatus(int statusId) const;
 
     void setShipData(const QMap<QString, QJsonObject> &shipData, const QVector<QString> &shipOrder);
     void setPage(int page, int itemsPerPage);
     void fetchMessageTypes();
     QString getMessageTypeDescription(int messageTypeId) const;
-    QString getTrackNavStatus(int statusId) const;
     void fetchTrackNavStatuses();
+
+
 
 
 signals:
