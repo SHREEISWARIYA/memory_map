@@ -1,4 +1,4 @@
-QT += quick concurrent widgets
+QT += quick concurrent widgets location positioning
 QTPLUGIN += qml_QtGraphicalEffects
 
 # You can make your code fail to compile if it uses deprecated APIs.
