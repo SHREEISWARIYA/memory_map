@@ -30,9 +30,10 @@ int main(int argc, char *argv[])
     //PastTrack pastTrack;
     PastTrail pastTrail;
     PastHistory pastHistory;
+    ShipTableModel shipTableModel;
+
     UserSettings userSettings;
     BackgroundProcessor backgroundProcessor;
-    ShipTableModel shipTableModel;
 
 
     // Connect the mapPathsUpdated signal to startProcessing slot
@@ -54,11 +55,12 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("pastTrail", &pastTrail);
     engine.rootContext()->setContextProperty("pastHistory", &pastHistory);
     //engine.rootContext()->setContextProperty("messageType", messageType);
+    engine.rootContext()->setContextProperty("shipTableModel", &shipTableModel);
+    //engine.rootContext()->setContextProperty("infoPanel", infoPanel);
+
+
     engine.rootContext()->setContextProperty("userSettings", &userSettings);
     engine.rootContext()->setContextProperty("backgroundProcessor", &backgroundProcessor);
-    engine.rootContext()->setContextProperty("shipTableModel", &shipTableModel);
-
-    //engine.rootContext()->setContextProperty("infoPanel", infoPanel);
 
     // Initial start of processing
     backgroundProcessor.startProcessing(&userSettings);

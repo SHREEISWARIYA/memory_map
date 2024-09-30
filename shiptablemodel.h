@@ -30,14 +30,13 @@ public:
 
     Q_INVOKABLE QJsonObject getShipDataForRow(int row) const;
     Q_INVOKABLE QString getTrackNavStatus(int statusId) const;
+    Q_INVOKABLE QString formatTimeDifference(qint64 milliseconds) const;
 
     void setShipData(const QMap<QString, QJsonObject> &shipData, const QVector<QString> &shipOrder);
     void setPage(int page, int itemsPerPage);
     void fetchMessageTypes();
     QString getMessageTypeDescription(int messageTypeId) const;
     void fetchTrackNavStatuses();
-
-
 
 
 signals:

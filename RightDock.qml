@@ -105,6 +105,7 @@ Drawer {
                 anchors.fill: parent
                 spacing: 1
 
+
                 Repeater {
                     model: [
                         { label: "MMSI", value: infoPanel.currentShip ? infoPanel.currentShip.mmsi : "N/A" },
@@ -115,7 +116,7 @@ Drawer {
                     Rectangle {
                         width: parent.width / 3
                         height: parent.height
-                        color: index % 2 === 0 ? "#ffffff" : "#f9f9f9"
+
 
                         Column {
                             anchors.centerIn: parent
@@ -141,6 +142,9 @@ Drawer {
             }
         }
 
+
+
+
         Rectangle {
             Layout.fillWidth: true
             height: 60
@@ -151,6 +155,7 @@ Drawer {
             Row {
                 anchors.fill: parent
                 spacing: 1
+
 
                 Repeater {
                     model: [
@@ -167,20 +172,27 @@ Drawer {
                                 (infoPanel.currentShip.course_over_ground !== undefined ?
                                     infoPanel.currentShip.course_over_ground.toFixed(1) + "°" : "N/A")
                                 : "N/A"
-                        }
+                        },
+                        {
+                                        label: "Last Update",
+                                        value: infoPanel.currentShip && infoPanel.currentShip.sensor_timestamp ?
+                                            shipTableModel.formatTimeDifference(infoPanel.currentShip.sensor_timestamp) : "N/A"
+                                    }
                     ]
 
                     Rectangle {
                         width: parent.width / 2
                         height: parent.height
-                        color: index % 2 === 0 ? "#ffffff" : "#f9f9f9"
+
 
                         Column {
-                            anchors.centerIn: parent
-                            spacing: 5
+                            anchors.fill: parent
+                            anchors.margins: 5
+                            spacing: 2
 
                             Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
                                 text: modelData.label
                                 font.pixelSize: 12
                                 font.bold: true
@@ -188,16 +200,86 @@ Drawer {
                             }
 
                             Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: parent.width
+                                height: parent.height - parent.spacing - parent.children[0].height
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
                                 text: modelData.value
                                 font.pixelSize: 14
                                 color: "#333333"
+                                wrapMode: Text.WordWrap
+                                maximumLineCount: 2
+                                elide: Text.ElideNone
                             }
+
+
                         }
                     }
                 }
             }
         }
+
+
+
+        // New Rectangle for time difference
+        Rectangle {
+            id: timeDifferenceRect
+            width: parent.width
+            height: 50 // Adjust this value as needed
+            color: "#ffffff"
+
+            Text {
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: {
+                    if (infoPanel.currentShip.sensor_timestamp) {
+                        var now = new Date().getTime();
+                        var sensorTime = parseInt(infoPanel.currentShip.sensor_timestamp, 10);
+                        var diff = now - sensorTime;
+                        console.log("*****now time"+now);
+                        console.log("*****sensorTime"+sensorTime);
+                        console.log("*****diff"+diff);
+                        var formattedTime = shipTableModel.formatTimeDifference(diff);
+                         return "Received: " + formattedTime + " ago";
+                    }
+                    return "No timestamp available";
+                }
+                font.pixelSize: 12
+                color: "#333333"
+                wrapMode: Text.Wrap
+            }
+        }
+
+        // Buttons at the bottom
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.margins: 10
+            spacing: 10
+
+            Button {
+                Layout.fillWidth: true
+                text: "Show Trail"
+                onClicked: {
+                    if (currentShipUuid) {
+                        infoPanel.fetchTrackHistoryRequested(currentShipUuid)
+                        infoPanel.shipDetailsRequested(currentShip.track_name, currentShip.latitude, currentShip.longitude)
+                    } else {
+                        console.error("No ship UUID available")
+                    }
+                }
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "Hide Trail"
+                onClicked: {
+                    infoPanel.hidePastTrackRequested()
+                }
+            }
+        }
+
+
 
 
         // Ship details
@@ -244,33 +326,7 @@ Last Update: ${ship.sensor_timestamp}
         // After the MMSI, Latitude, Longitude section
 
 
-        // Buttons at the bottom
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.margins: 10
-            spacing: 10
 
-            Button {
-                Layout.fillWidth: true
-                text: "Show Trail"
-                onClicked: {
-                    if (currentShipUuid) {
-                        infoPanel.fetchTrackHistoryRequested(currentShipUuid)
-                        infoPanel.shipDetailsRequested(currentShip.track_name, currentShip.latitude, currentShip.longitude)
-                    } else {
-                        console.error("No ship UUID available")
-                    }
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Hide Trail"
-                onClicked: {
-                    infoPanel.hidePastTrackRequested()
-                }
-            }
-        }
     }
 
     onClosed: {
@@ -278,4 +334,34 @@ Last Update: ${ship.sensor_timestamp}
             open()
         }
     }
+
+    // function getTimeDifference(timestamp) {
+    //     console.log("Timestamp received:", timestamp);
+    //     if (!timestamp) return "N/A";
+
+    //     var now = new Date().getTime();
+    //     var sensorTime = parseInt(timestamp, 10); // Convert to integer
+
+    //     console.log("Current time:", now);
+    //     console.log("Sensor time:", sensorTime);
+
+    //     if (isNaN(sensorTime)) {
+    //         console.error("Failed to parse timestamp:", timestamp);
+    //         return "Invalid timestamp";
+    //     }
+
+    //     var diff = now - sensorTime;
+    //     console.log("Time difference (ms):", diff);
+
+    //     var seconds = Math.floor(diff / 1000);
+    //     var minutes = Math.floor(seconds / 60);
+    //     var hours = Math.floor(minutes / 60);
+    //     var days = Math.floor(hours / 24);
+
+    //     if (days > 0) return days + " day" + (days > 1 ? "s" : "") + " ago";
+    //     if (hours > 0) return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+    //     if (minutes > 0) return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+    //     return seconds + " second" + (seconds !== 1 ? "s" : "") + " ago";
+    // }
+
 }

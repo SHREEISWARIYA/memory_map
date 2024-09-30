@@ -339,6 +339,36 @@ QString ShipTableModel::formatTimestamp(const QVariant &timestamp) const
     return dateTime.toString("dd MMM yyyy hh:mm:ss");
 }
 
+QString ShipTableModel::formatTimeDifference(qint64 milliseconds) const
+{
+    qDebug() << "Value come to format Time Difference";
+    qint64 seconds = milliseconds / 1000;
+    qint64 minutes = seconds / 60;
+    qint64 hours = minutes / 60;
+    qint64 days = hours / 24;
+
+    seconds %= 60;
+    minutes %= 60;
+    hours %= 24;
+
+    QStringList parts;
+
+    if (days > 0) {
+        parts << QString("%1 day%2").arg(days).arg(days > 1 ? "s" : "");
+    }
+    if (hours > 0) {
+        parts << QString("%1 hour%2").arg(hours).arg(hours > 1 ? "s" : "");
+    }
+    if (minutes > 0) {
+        parts << QString("%1 minute%2").arg(minutes).arg(minutes > 1 ? "s" : "");
+    }
+    if (seconds > 0 || parts.isEmpty()) {
+        parts << QString("%1 second%2").arg(seconds).arg(seconds != 1 ? "s" : "");
+    }
+
+    return parts.join(", ");
+}
+
 // QString ShipTableModel::getTrackNavStatus(int statusId) const
 // {
 //     return m_trackNavStatusMap.value(statusId, "Unknown");

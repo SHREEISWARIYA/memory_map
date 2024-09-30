@@ -52,7 +52,7 @@ ApplicationWindow {
             target: infoPanel
             function onFetchTrackHistoryRequested(uuid) {
                 console.log("Main.qml: Fetching track history for UUID:", uuid)
-                pastTrail.fetchTrackHistory(uuid, 48)
+                pastTrail.fetchTrackHistory(uuid, 900)
             }
             function onShipDetailsRequested(name, latitude, longitude) {
                     console.log(" ****Ship details requested: ***")
