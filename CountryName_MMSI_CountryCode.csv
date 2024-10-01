@@ -1,0 +1,290 @@
+201,Albania,al
+202,Andorra,ad
+203,Austria,at
+204,Portugal,pt
+205,Belgium,be
+206,Belarus,by
+207,Bulgaria,bg
+208,Vatican,va
+209,Cyprus,cy
+210,Cyprus,cy
+211,Germany,de
+212,Cyprus,cy
+213,Georgia,ge
+214,Moldova,md
+215,Malta,mt
+216,Armenia,am
+218,Germany,de
+219,Denmark,dk
+220,Denmark,dk
+224,Spain,es
+225,Spain,es
+226,France,fr
+227,France,fr
+228,France,fr
+229,Malta,mt
+230,Finland,fi
+231,Faroe Is,fo
+232,United Kingdom,gb
+233,United Kingdom,gb
+234,United Kingdom,gb
+235,United Kingdom,gb
+236,Gibraltar,gi
+237,Greece,gr
+238,Croatia,hr
+239,Greece,gr
+240,Greece,gr
+241,Greece,gr
+242,Morocco,ma
+243,Hungary,hu
+244,Netherlands,nl
+245,Netherlands,nl
+246,Netherlands,nl
+247,Italy,it
+248,Malta,mt
+249,Malta,mt
+250,Ireland,ie
+251,Iceland,is
+252,Liechtenstein,li
+253,Luxembourg,lu
+254,Monaco,mc
+255,Portugal,pt
+256,Malta,mt
+257,Norway,no
+258,Norway,no
+259,Norway,no
+261,Poland,pl
+262,Montenegro,me
+263,Portugal,pt
+264,Romania,ro
+265,Sweden,se
+266,Sweden,se
+267,Slovakia,sk
+268,San Marino,sm
+269,Switzerland,ch
+270,Czech Republic,cz
+271,Turkey,tr
+272,Ukraine,ua
+273,Russia,ru
+274,FYR Macedonia,mk
+275,Latvia,lv
+276,Estonia,ee
+277,Lithuania,lt
+278,Slovenia,si
+279,Serbia,rs
+301,Anguilla,ai
+303,USA,us
+304,Antigua Barbuda,ag
+305,Antigua Barbuda,ag
+306,Curacao,cw
+307,Aruba,aw
+308,Bahamas,bs
+309,Bahamas,bs
+310,Bermuda,bm
+311,Bahamas,bs
+312,Belize,bz
+314,Barbados,bb
+316,Canada,ca
+319,Cayman Is,ky
+321,Costa Rica,cr
+323,Cuba,cu
+325,Dominica,dm
+327,Dominican Rep,do
+329,Guadeloupe,gp
+330,Grenada,gd
+331,Greenland,gl
+332,Guatemala,gt
+334,Honduras,hn
+336,Haiti,ht
+338,USA,us
+339,Jamaica,jm
+341,St Kitts Nevis,kn
+343,St Lucia,lc
+345,Mexico,mx
+347,Martinique,mq
+348,Montserrat,ms
+350,Nicaragua,ni
+351,Panama,pa
+352,Panama,pa
+353,Panama,pa
+354,Panama,pa
+355,Panama,pa
+356,Panama,pa
+357,Panama,pa
+358,Puerto Rico,pr
+359,El Salvador,sv
+361,St Pierre Miquelon,pm
+362,Trinidad Tobago,tt
+364,Turks Caicos Is,tc
+366,USA,us
+367,USA,us
+368,USA,us
+369,USA,us
+370,Panama,pa
+371,Panama,pa
+372,Panama,pa
+373,Panama,pa
+374,Panama,pa
+375,St Vincent Grenadines,vc
+376,St Vincent Grenadines,vc
+377,St Vincent Grenadines,vc
+378,British Virgin Is,vg
+379,US Virgin Is,vi
+401,Afghanistan,af
+403,Saudi Arabia,sa
+405,Bangladesh,bd
+408,Bahrain,bh
+410,Bhutan,bt
+412,China,cn
+413,China,cn
+414,China,cn
+416,Taiwan,tw
+417,Sri Lanka,lk
+419,India,in
+422,Iran,ir
+423,Azerbaijan,az
+425,Iraq,iq
+428,Israel,il
+431,Japan,jp
+432,Japan,jp
+434,Turkmenistan,tm
+436,Kazakhstan,kz
+437,Uzbekistan,uz
+438,Jordan,jo
+440,Korea,kr
+441,Korea,kr
+443,Palestine,ps
+445,DPR Korea,kp
+447,Kuwait,kw
+450,Lebanon,lb
+451,Kyrgyz Republic,kg
+453,Macao,mo
+455,Maldives,mv
+457,Mongolia,mn
+459,Nepal,np
+461,Oman,om
+463,Pakistan,pk
+466,Qatar,qa
+468,Syria,sy
+470,UAE,ae
+471,UAE,ae
+472,Tajikistan,tj
+473,Yemen,ye
+475,Yemen,ye
+477,Hong Kong,hk
+478,Bosnia and Herzegovina,ba
+501,Antarctica,aq
+503,Australia,au
+506,Myanmar,mm
+508,Brunei,bn
+510,Micronesia,fm
+511,Palau,pw
+512,New Zealand,nz
+514,Cambodia,kh
+515,Cambodia,kh
+516,Christmas Is,cx
+518,Cook Is,ck
+520,Fiji,fj
+523,Cocos Is,cc
+525,Indonesia,id
+529,Kiribati,ki
+531,Laos,la
+533,Malaysia,my
+536,N Mariana Is,mp
+538,Marshall Is,mh
+540,New Caledonia,nc
+542,Niue,nu
+544,Nauru,nr
+546,French Polynesia,pf
+548,Philippines,ph
+553,Papua New Guinea,pg
+555,Pitcairn Is,pn
+557,Solomon Is,sb
+559,American Samoa,as
+561,Samoa,ws
+563,Singapore,sg
+564,Singapore,sg
+565,Singapore,sg
+566,Singapore,sg
+567,Thailand,th
+570,Tonga,to
+572,Tuvalu,tv
+574,Vietnam,vn
+576,Vanuatu,vu
+577,Vanuatu,vu
+578,Wallis Futuna Is,wf
+601,South Africa,za
+603,Angola,ao
+605,Algeria,dz
+607,St Paul Amsterdam Is,tf
+608,Ascension Is,io
+609,Burundi,bi
+610,Benin,bj
+611,Botswana,bw
+612,Cen Afr Rep,cf
+613,Cameroon,cm
+615,Congo,cg
+616,Comoros,km
+617,Cape Verde,cv
+618,Antarctica,aq
+619,Ivory Coast,ci
+620,Comoros,km
+621,Djibouti,dj
+622,Egypt,eg
+624,Ethiopia,et
+625,Eritrea,er
+626,Gabon,ga
+627,Ghana,gh
+629,Gambia,gm
+630,Guinea-Bissau,gw
+631,Equ. Guinea,gq
+632,Guinea,gn
+633,Burkina Faso,bf
+634,Kenya,ke
+635,Antarctica,aq
+636,Liberia,lr
+637,Liberia,lr
+642,Libya,ly
+644,Lesotho,ls
+645,Mauritius,mu
+647,Madagascar,mg
+649,Mali,ml
+650,Mozambique,mz
+654,Mauritania,mr
+655,Malawi,mw
+656,Niger,ne
+657,Nigeria,ng
+659,Namibia,na
+660,Reunion,re
+661,Rwanda,rw
+662,Sudan,sd
+663,Senegal,sn
+664,Seychelles,sc
+665,St Helena,sh
+666,Somalia,so
+667,Sierra Leone,sl
+668,Sao Tome Principe,st
+669,Swaziland,sz
+670,Chad,td
+671,Togo,tg
+672,Tunisia,tn
+674,Tanzania,tz
+675,Uganda,ug
+676,DR Congo,cd
+677,Tanzania,tz
+678,Zambia,zm
+679,Zimbabwe,zw
+701,Argentina,ar
+710,Brazil,br
+720,Bolivia,bo
+725,Chile,cl
+730,Colombia,co
+735,Ecuador,ec
+740,UK,uk
+745,Guiana,gf
+750,Guyana,gy
+755,Paraguay,py
+760,Peru,pe
+765,Suriname,sr
+770,Uruguay,uy
+775,Venezuela,ve

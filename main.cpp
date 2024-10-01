@@ -5,12 +5,11 @@
 #include "shipdatamodel.h"
 #include "cursorcontroller.h"
 #include "pastTrail.h"
-#include "pasthistory.h"
-//#include "messagetype.h"
 #include "ShapefileManager.h"
 #include "UserSettings.h"
 #include "backgroundprocessor.h"
 #include "shiptablemodel.h"
+#include "flagimg.h"
 
 
 int main(int argc, char *argv[])
@@ -22,14 +21,12 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    //qmlRegisterType<PastTrail>("com.example", 1, 0, "PastTrail");
+    qmlRegisterType<FlagImg>("YourNamespace", 1, 0, "FlagImg");
 
     ShipData shipData;
     ShipDataModel shipDataModel;
     CursorController cursorController;
-    //PastTrack pastTrack;
     PastTrail pastTrail;
-    PastHistory pastHistory;
     ShipTableModel shipTableModel;
 
     UserSettings userSettings;
@@ -53,8 +50,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("shipDataModel", &shipDataModel);
     engine.rootContext()->setContextProperty("cursorController", &cursorController);
     engine.rootContext()->setContextProperty("pastTrail", &pastTrail);
-    engine.rootContext()->setContextProperty("pastHistory", &pastHistory);
-    //engine.rootContext()->setContextProperty("messageType", messageType);
     engine.rootContext()->setContextProperty("shipTableModel", &shipTableModel);
     //engine.rootContext()->setContextProperty("infoPanel", infoPanel);
 

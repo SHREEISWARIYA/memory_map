@@ -26,11 +26,7 @@ void ShipTableModel::fetchMessageTypes()
 
 void ShipTableModel::fetchTrackNavStatuses()
 {
-<<<<<<< HEAD
     QNetworkRequest request(QUrl("http://localhost:3000/api/ships/TrackNavStatuses"));
-=======
-    QNetworkRequest request(QUrl("http://192.168.1.12:3000/api/ships/TrackNavStatuses"));
->>>>>>> origin/master
     m_networkManager->get(request);
 }
 

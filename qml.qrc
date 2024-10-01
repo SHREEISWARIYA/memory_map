@@ -26,5 +26,6 @@
         <file>cargo.svg</file>
         <file>cargo_med.svg</file>
         <file>shipImg.jpg</file>
+        <file>tanker2.svg</file>
     </qresource>
 </RCC>

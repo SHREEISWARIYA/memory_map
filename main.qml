@@ -119,7 +119,7 @@ ApplicationWindow {
                 // Remove previous track history lines
                 var removedCount = 0;
                 for (var i = mapview.mapItems.length - 1; i >= 0; i--) {
-                    if (mapview.mapItems[i].objectName === "trackHistoryLine") {
+                    if (mapview.mapItems[i].objectName === "trackHistoryLine" ||mapview.mapItems[i].objectName === "trackHistoryPoint" ) {
                         mapview.removeMapItem(mapview.mapItems[i]);
                         removedCount++;
                     }
@@ -136,6 +136,12 @@ ApplicationWindow {
 
                     var coordinate = QtPositioning.coordinate(point.latitude, point.longitude);
                     path.push(coordinate);
+
+                    var marker = pointMarkerComponent.createObject(mapview,{
+                                                                        "coordinate":coordinate,
+                                                                        "objectName":"trackHistoryPoint"
+                                                                    })
+                    mapview.addMapItem(marker);
                 }
 
                 // Create and add the line
@@ -163,30 +169,59 @@ ApplicationWindow {
             Component {
                 id: dottedLineComponent
                 MapPolyline {
-                    line.width: 3
+                    line.width: 2
                     line.color: "red"
                 }
             }
 
-            Component {
-                id: highlightCircleComponent
-                MapQuickItem {
-                    anchorPoint.x: circle.width/2
-                    anchorPoint.y: circle.height/2
-                    sourceItem: Rectangle {
-                        id: circle
-                        width: 40
-                        height: 40
-                        radius: width  // This makes the rectangle circular
-                        color: "transparent"
-                        border.color: "red"
-                        border.width: 3
-                        opacity: 0.7
+            // Component {
+            //     id: highlightCircleComponent
+            //     MapQuickItem {
+            //         anchorPoint.x: circle.width/2
+            //         anchorPoint.y: circle.height/2
+            //         sourceItem: Rectangle {
+            //             id: circle
+            //             width: 40
+            //             height: 40
+            //             radius: width  // This makes the rectangle circular
+            //             color: "transparent"
+            //             border.color: "red"
+            //             border.width: 3
+            //             opacity: 0.7
 
+            //         }
+            //         zoomLevel: 0
+            //     }
+            // }
+
+            Component {
+                    id: pointMarkerComponent
+                    MapQuickItem {
+                        anchorPoint.x: pointMarker.width / 2
+                        anchorPoint.y: pointMarker.height / 2
+                        sourceItem: Item {
+                            id: pointMarker
+                            width: 5
+                            height: 5
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: parent.width
+                                height: parent.height
+                                radius: width / 2
+                                color: "transparent"
+                                border.color: "red"
+                                border.width: 1
+                            }
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 3
+                                height: 3
+                                radius: width / 2
+                                color: "red"
+                            }
+                        }
                     }
-                    zoomLevel: 0
                 }
-            }
 
             Component {
                 id: shipLabelComponent
@@ -209,7 +244,7 @@ ApplicationWindow {
                 // Remove all track history lines and ship markers
                 for (var i = mapview.mapItems.length - 1; i >= 0; i--) {
                     var item = mapview.mapItems[i];
-                    if (item.objectName === "trackHistoryLine" ||
+                    if (item.objectName === "trackHistoryLine" || item.objectName === "trackHistoryPoint" ||
                         (item.objectName && item.objectName.startsWith("shipMarker_") || item.objectName.startsWith("shipLabel_"))) {
                         mapview.removeMapItem(item);
                     }
@@ -458,6 +493,8 @@ ApplicationWindow {
 
                 sourceItem: Image {
 
+
+
                     // id: image
                     // //source: "qrc:/ship.png"
                     // source: "qrc:/cargo.svg"
@@ -483,7 +520,8 @@ ApplicationWindow {
 
                                 Image {
                                     id: image
-                                    source: "qrc:/cargo_med.svg"
+                                    //source: "qrc:/cargo_med.svg"
+                                    source: shipDetails.message_type__id === 1 ? "qrc:/cargo_med.svg" : "qrc:/tanker2.svg"
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
                                     rotation: shipDetails.course_over_ground - 90 || 0
@@ -497,6 +535,8 @@ ApplicationWindow {
                             console.log("Clicked MMSI:", shipDetails.mmsi);
                             console.log("Latitude:", shipDetails.latitude);
                             console.log("Longitude:", shipDetails.longitude);
+
+
 
                             if (shipDetails.latitude && shipDetails.longitude) {
                                 handleShipClick(shipDetails.latitude, shipDetails.longitude, shipDetails.track_name, shipDetails.mmsi);
@@ -588,6 +628,8 @@ ApplicationWindow {
                         onClicked: {
                             let mmsi = shipDetails.mmsi;
                             console.log("Clicked ship MMSI:", mmsi);
+
+                             console.log("%%%%%%%%%%%%%%% ",shipDetails.message_type__id);
 
                             let uuid = shipData.getUuidFromMmsi(mmsi);
                             if (uuid) {

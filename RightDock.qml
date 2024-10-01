@@ -2,8 +2,16 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+// At the top of your RightDock.qml file, add the import statement
+import YourNamespace 1.0
 
 Drawer {
+
+    // Add the FlagImg instance here
+        FlagImg {
+            id: flagImg
+        }
+
     id: infoPanel
     width: 250
     //height: parent.height
@@ -110,7 +118,8 @@ Drawer {
                     model: [
                         { label: "MMSI", value: infoPanel.currentShip ? infoPanel.currentShip.mmsi : "N/A" },
                         { label: "Latitude", value: infoPanel.currentShip ? infoPanel.currentShip.latitude.toFixed(4) + "°" : "N/A" },
-                        { label: "Longitude", value: infoPanel.currentShip ? infoPanel.currentShip.longitude.toFixed(4) + "°" : "N/A" }
+                        { label: "Longitude", value: infoPanel.currentShip ? infoPanel.currentShip.longitude.toFixed(4) + "°" : "N/A" },
+                        { label: "Country", value: infoPanel.currentShip ? flagImg.getCountryCode(infoPanel.currentShip.mmsi) : "N/A" }
                     ]
 
                     Rectangle {
@@ -262,6 +271,7 @@ Drawer {
                 text: "Show Trail"
                 onClicked: {
                     if (currentShipUuid) {
+
                         infoPanel.fetchTrackHistoryRequested(currentShipUuid)
                         infoPanel.shipDetailsRequested(currentShip.track_name, currentShip.latitude, currentShip.longitude)
                     } else {
